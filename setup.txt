@@ -1,0 +1,76 @@
+python3 -m venv venv
+source venv/bin/activate
+
+npm install -g create-react-app
+npx create-react-app app
+
+npm i
+
+cd app/
+
+npm install @mediapipe/tasks-vision
+
+#########################
+# symlink 
+cd public/llm_inference
+
+# Create a global symlink
+npm link
+
+# Navigate back to your project directory
+cd ../node_modules
+
+# Create a symlink in node_modules
+npm link llm_inference
+
+
+// --------------------
+.gitignore:
+
+/venv
+
+# dependencies
+/node_modules
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+// --------------------
+
+
+npm install --save gh-pages
+
+
+// In package.json:
+
+"homepage": "https://kgates-github.github.io/agentive_I"
+
+"scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+}
+
+npm run deploy
+
+
+
+
+APENDIX
+
