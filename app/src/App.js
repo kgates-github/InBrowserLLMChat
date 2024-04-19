@@ -1,58 +1,63 @@
-import logo from './logo.svg';
 import './App.css';
-import React, { useEffect, useRef, useState, useContext } from 'react';
-import getLlmInference from './llm_inference';
+import GestureCapturer from './components/GestureCapturer';
+import Log from './components/Log';
+import React, { useState } from 'react';
+import { LogContext } from './components/LogContext';
+import Assistant from './components/Assistant';
 
 function App() {
-  const [llmInference, setLlmInference] = useState(null);
-  const [message, setMessage] = useState("");
-  let partialMessage = "";
+  const userAgent = navigator.userAgent;
+  const [logEntries, setLogEntries] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [introDisplay, setIntroDisplay] = useState('none');
 
-  const displayPartialResults = (partialResults, complete)  =>{
-    partialMessage += partialResults
-    setMessage(partialMessage);
-  
-    if (complete) {
-      if (!message) {
-        setMessage('Result is empty');
-        partialMessage = "";
-      }
-    }
+  const log = (entry) => {
+    setLogEntries(prevEntries => [...prevEntries, entry]);
   }
 
-  useEffect(() => {   
-    getLlmInference().then(result => {
-      console.log("getLlmInference result", result)
-      setLlmInference(result);
-    }).catch(error => {
-      console.log(error)
-    });
-  }, []);
+  // Set up our custom gesture events
+  const subscribe = (eventName, listener) => {
+    log('Subscribing to ' + eventName);
+    document.addEventListener(eventName, listener);
+  }
+  
+  const unsubscribe = (eventName, listener) => {
+    log('Unsubscribing from ' + eventName);
+    document.removeEventListener(eventName, listener);
+  }
+  
+  const publish = (eventName, data) => {
+    const event = new CustomEvent(eventName, { detail: data });
+    //console.log('publishing event', eventName, data);
+    document.dispatchEvent(event);
+  }
 
-  useEffect(() => {   
-    if (llmInference != null) {
-      llmInference.generateResponse("What is the capital of California?", displayPartialResults);
-    }
-  } , [llmInference]);
- 
   return (
-    <div className="App">
-      {message.length > 0 ? message : null}
-    </div>
+    <LogContext.Provider value={log}>
+    { (userAgent.indexOf("Chrome") > -1) ? 
+      <>
+        <GestureCapturer 
+          publish={publish} 
+          setIsLoaded={setIsLoaded} 
+          introDisplay={introDisplay}
+          setIntroDisplay={setIntroDisplay}
+        />
+        <div className="header" style={{position:"fixed", top:0, left:0}}>
+          <div style={{flex:1}}></div>
+          <div className="title">
+            <div className="header-06" style={{color:"white"}}>Agentive I</div>
+          </div>
+          <div style={{flex:1}}></div>
+        </div>
+        {isLoaded ? <Assistant
+          subscribe={subscribe} 
+          unsubscribe={unsubscribe} 
+          setIntroDisplay={setIntroDisplay}/> : null}
+        <Log entries={logEntries}/>
+      </>
+     : <div style={{padding: "20px", textAlign:"center"}}>This app is only supported in Google Chrome</div> }
+    </LogContext.Provider>
   );
 }
 
 export default App;
-
-
-
-// maxTokens: 512,  // The maximum number of tokens (input tokens + output
-        //                  // tokens) the model handles.
-        // randomSeed: 1,   // The random seed used during text generation.
-        // topK: 1,  // The number of tokens the model considers at each step of
-        //           // generation. Limits predictions to the top k most-probable
-        //           // tokens. Setting randomSeed is required for this to make
-        //           // effects.
-        // temperature:
-        //     1.0,  // The amount of randomness introduced during generation.
-        //           // Setting randomSeed is required for this to make effects.

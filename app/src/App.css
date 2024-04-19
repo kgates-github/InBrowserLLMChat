@@ -1,38 +1,163 @@
-.App {
-  text-align: center;
+
+.deskTop {
+  background:"#545554"
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+
+.header {
+  padding: 8px 10px 0px 10px;
+  width:100%; 
+  background-color: none; 
+  display:flex; 
+  flex-direction: row; 
+  position: absolute; 
+  top: 0px; left: 0px; 
+  z-index: 20000;
+}
+.title {
+  background-color: none; 
+  font: 12px 'Source Sans Pro'; 
+  flex:1; display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+  align-items: center;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.outerContainer {
+  position:absolute; 
+  top:0px; 
+  left:0px; 
+  z-index:100; 
+  width:100%; 
+  height:100%; 
+  background:none;
+  display: flex; 
+  justify-content: center;
+  font-family: "Source Sans Pro", sans-serif;
+  font-size:16px;
+  background-color: none;
+  overflow-y: hidden;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
+#innerContainer {
+  display:flex; 
+  background:none; 
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  background-color: none;
 }
 
-.App-link {
-  color: #61dafb;
+body {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 16px;
+  color: #444;
+  overflow-y: hidden;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+#webcamButton {
+  /*border:2px solid #ccc; */
+  width:200px; 
+  height:33px;
+  border-radius:20px;
+  padding-top:2px;
+  padding-bottom:3px;
+  text-align: center;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10000;
+  color:#fff;
+  background-color: #333;
 }
+
+#loadingContainer {
+  display:flex; 
+  background:none; 
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading {
+  display:flex; 
+  background:none; 
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.annotations {
+  height:52px; 
+}
+
+/* ------------------------------------------- */
+/* Headers and spacers */
+/* ------------------------------------------- */
+
+.header-01 {
+  color:#444; 
+  letter-spacing: 1.1px; 
+  text-transform: uppercase; 
+}
+.header-02 {
+  font-family:'Source Sans Pro', sans-serif; 
+  font-size: 32px; 
+  line-height: 1.03em;
+  font-weight:500;
+}
+.header-03 {
+  color:#222; 
+  font-family:'Source Sans Pro', sans-serif; 
+  font-size: 14px;
+  font-weight:700;
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+}
+.header-04 {
+  color:#222; 
+  font-family:'Source Sans Pro', sans-serif; 
+  font-size: 14px; 
+  font-weight:600;
+}
+.header-05 {
+  color:#222; 
+  font-family:'Source Sans Pro', sans-serif; 
+  font-size: 14px; 
+  font-weight:500;
+  text-transform: uppercase;
+  margin-right: 20px;
+  margin-left: 20px;
+  height: 40px;
+  line-height: 14px;
+  text-align: center;
+}
+
+.header-06 {
+  color:#666; 
+  font-family:'Source Sans Pro', sans-serif; 
+  font-size: 14px; 
+  font-weight:500;
+}
+
+.button-check {
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.logs {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+}
+
+.logs .log {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+  line-height: 1.2em;
+  color: #222;
+  padding: 4px;
+  border-bottom: 1px solid #ccc;
+}
+
+

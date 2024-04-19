@@ -9,19 +9,7 @@ npm i
 cd app/
 
 npm install @mediapipe/tasks-vision
-
-#########################
-# symlink 
-cd public/llm_inference
-
-# Create a global symlink
-npm link
-
-# Navigate back to your project directory
-cd ../node_modules
-
-# Create a symlink in node_modules
-npm link llm_inference
+npm install framer-motion
 
 
 // --------------------
