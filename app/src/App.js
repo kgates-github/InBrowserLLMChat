@@ -45,7 +45,7 @@ function App() {
         <div className="header" style={{position:"fixed", top:0, left:0}}>
           <div style={{flex:1}}></div>
           <div className="title">
-            <div className="header-06" style={{color:"white"}}>Agentive I</div>
+            <div className="header-06" style={{color:"white"}}>Agentic I</div>
           </div>
           <div style={{flex:1}}></div>
         </div>
@@ -53,7 +53,7 @@ function App() {
           subscribe={subscribe} 
           unsubscribe={unsubscribe} 
           setIntroDisplay={setIntroDisplay}/> : null}
-        <Log entries={logEntries}/>
+        {/*<Log entries={logEntries}/>*/}
       </>
      : <div style={{padding: "20px", textAlign:"center"}}>This app is only supported in Google Chrome</div> }
     </LogContext.Provider>

@@ -1,0 +1,21 @@
+<svg width="123" height="105" viewBox="0 0 123 105" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_458_1029)">
+<mask id="mask0_458_1029" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="41" y="69" width="40" height="40">
+<rect x="81" y="109" width="40" height="40" transform="rotate(-180 81 109)" fill="#D9D9D9"/>
+</mask>
+<g mask="url(#mask0_458_1029)">
+<path d="M62.3333 79.111V95.3333L69.0556 88.6943L71 90.6665L60.9722 100.694L50.9445 90.6665L52.8889 88.7221L59.5555 95.3888V79.111H62.3333Z" fill="#BFBFBF"/>
+</g>
+<mask id="mask1_458_1029" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="41" y="-5" width="40" height="40">
+<rect x="41" y="-5" width="40" height="40" fill="#D9D9D9"/>
+</mask>
+<g mask="url(#mask1_458_1029)">
+<path d="M59.6667 24.889V8.66675L52.9444 15.3057L51 13.3335L61.0278 3.30566L71.0555 13.3335L69.1111 15.2779L62.4445 8.61121V24.889H59.6667Z" fill="#BFBFBF"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_458_1029">
+<rect width="123" height="105" fill="white"/>
+</clipPath>
+</defs>
+</svg>

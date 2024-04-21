@@ -151,7 +151,7 @@ function GestureCapturer(props) {
               textAlign:"center",
               lineHeight:"1.2em",
             }}>
-            This prototype is an exploration of how users might interact with an AI assistant using a combination of voice and gestures. It needs access to your webcam and mic.
+            This prototype explores how users might interact with an AI assistant using voice and gestures. It needs access to your webcam and mic.
           </div>
           <div ref={enableWebcamButtonRef}  id="webcamButton">
             <span className="">Enable Webcam</span>

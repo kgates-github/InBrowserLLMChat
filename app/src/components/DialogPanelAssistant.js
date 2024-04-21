@@ -9,11 +9,11 @@ function DialogPanelAssistant(props) {
   }, []);
 
   return (
-    <div>
+    <div style={{marginBottom:"20px", }}>
       <div style={{
         display:"flex",
         flexDirection:"row",
-        marginBottom:"4px",
+        marginBottom:"0px",
       }}>
         <div style={{width:"38px",}}>
           <span 
@@ -48,7 +48,7 @@ function DialogPanelAssistant(props) {
   );
 }
 
-export { DialogPanelAssistant };
+export default DialogPanelAssistant;
 
 {/*
 <div style={{
