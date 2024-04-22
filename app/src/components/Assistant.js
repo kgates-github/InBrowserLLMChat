@@ -1,7 +1,8 @@
 import getLlmInference from './llm_inference';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import DialogPanelAssistant from './DialogPanelAssistant';
 import CoachTip from './CoachTip';
+import UserInput from './UserInput';
 import { motion } from "framer-motion"
 import '../App.css';
 import '../Assistant.css';
@@ -12,16 +13,16 @@ recognition.interimResults = true; // Get interim results
 
 function Assistant(props) {
   const [llmInference, setLlmInference] = useState(null);
-  const [message, setMessage] = useState(null);
+  const [llmIsProcessing, setLlmIsProcessing] = useState(false);
   const [chatState, setChatState] = useState('dormant');
   const [isLoaded, setIsLoaded] = useState(false);
   const [micActive, setMicActive] = useState(false);
   const [recognitionIsStarted, setRecognitionIsStarted] = useState(false);
   const [showCoachTip, setShowCoachTip] = useState(null);
+  const [userInput, setUserInput] = useState(null);
+  const [message, setMessage] = useState("");
+  const [chatPrompts, setChatPrompts] = useState("");
 
-  const openCommands = [
-    "hey", "hey there", "hello there", "dude", "hello"
-  ];
 
   /****************************************
     Miscellaneous Functions
@@ -34,62 +35,60 @@ function Assistant(props) {
     setMicActive(false);
   }
 
+  function getSetChatPrompts() {
+    return setChatPrompts;
+  }
+
   /****************************************
     LLM Inference
   *****************************************/
   let partialMessage = "";
  
-  const displayPartialResults = (partialResults, complete)  =>{
+  const displayPartialResults = (
+    partialResults, 
+    complete, 
+    chatPrompts,
+  ) => {
     partialMessage += partialResults
     setMessage(partialMessage);
   
     if (complete) {
-      if (!message) {
-        console.log("Empty message");
-      }
+      //const setChatPrompts = getSetChatPrompts();
+
+      const prompt = `${chatPrompts}
+      ${partialMessage}<end_of_turn>`
+
+      setChatPrompts(prompt);
     }
   }
-  const sendQuestion = () => { 
-    partialMessage = "";
-    const prompt = `Who is Buckminster Fuller?`
+
+  function sendQuestion(llmInference, userInput, chatPrompts) { 
+    partialMessage = ""; 
     
-    llmInference.generateResponse(prompt, displayPartialResults);
+    const prompt = `${chatPrompts}
+    <start_of_turn>user
+    ${userInput}<end_of_turn>
+    <start_of_turn>model`
+
+    console.log('/n*********************')
+    console.log('prompt', prompt)
+    console.log('*********************/n')
+
+    setChatPrompts(prompt);
+
+    llmInference.generateResponse(prompt, (partialResults, complete, chatPrompts) => displayPartialResults(partialResults, complete, chatPrompts));
   }
 
   /****************************************
     Speech recognition functions
   *****************************************/
-
-  const checkForCommand = (transcript) => {
-    for (let i = 0; i < openCommands.length; i++) {
-      if (transcript.includes(openCommands[i])) {
-        return true;
-      }
-    }
-    return false;
-  }
   
-  recognition.onresult = event => {
+  recognition.onresult = (e) => {
     if (chatState === 'ready') {
-      console.log('event.results[0][0].transcript', event.results[0][0].transcript)
-      if (checkForCommand(event.results[0][0].transcript)) {
-        // If we are opening chat, set mic active as default
-        setChatState('open');
-        setMicActive(true);
-      }
-    } else if (chatState === 'open' && micActive) {
-      console.log('For speech recognition transcript', event.results[0][0].transcript)
+      setChatState('open');
     }
-    //const transcript = event.results[0][0].transcript;
-    //props.setTranscription(transcript.charAt(0).toUpperCase() + transcript.slice(1));
-  };
-
-  recognition.onend = () => {
-    recognition.stop();
-    setRecognitionIsStarted(false);
-
-    setMicActive(false);
-    if (chatState === 'ready') setChatState('dormant');
+    const transcript = e.results[0][0].transcript;
+    setUserInput(transcript.charAt(0).toUpperCase() + transcript.slice(1));
   };
 
   /****************************************
@@ -103,7 +102,8 @@ function Assistant(props) {
       // Turn on mic and listen for speech
       recognition.stop();
       if (!recognitionIsStarted) recognition.start();
-      setRecognitionIsStarted(true)
+      setRecognitionIsStarted(true);
+      setMicActive(true);
       setChatState('ready');
     }
     props.subscribe("No_Gesture", (e) => handleNoGesture(e));
@@ -128,12 +128,6 @@ function Assistant(props) {
   *****************************************/
 
   useEffect(() => { 
-    /*
-    chatIsOpen, setChatIsOpen, 
-    isLoaded, setIsLoaded, 
-    micActive, setMicActive
-    recognitionIsStarted, setRecognitionIsStarted 
-    */
     props.subscribe("Open_Palm", (e) => 
       handleOpenPalm(e)
     );
@@ -149,10 +143,17 @@ function Assistant(props) {
     if (llmInference != null) {
       // Set active here
       setIsLoaded(true); 
-      setShowCoachTip("intro")
-      setMessage("How can I help you today?");
+      setShowCoachTip("intro");
+
+      recognition.onend = function(e) {
+        recognition.stop();
+        setRecognitionIsStarted(false);
+        setMicActive(false);
+        if (chatState === 'ready') setChatState('dormant');
+        sendQuestion(llmInference, userInput, chatPrompts);
+      };  
     }
-  } , [llmInference]);
+  } , [llmInference, userInput, chatPrompts]);
 
   useEffect(() => {  
     if (isLoaded && chatState === 'dormant') {
@@ -188,7 +189,7 @@ function Assistant(props) {
 
   const vaiantsAssistantAvatar = {
     ready: {
-      x: -2,
+      x: -1,
       y: 70,
       opacity: 1,
       rotate: 0,
@@ -213,17 +214,19 @@ function Assistant(props) {
       <CoachTip 
         image={"icon_palm_open"} 
         text1={''}
-        text2={'Raise your hand and say "hey!"'}
+        text2={'Raise your hand and say something...'}
         showCoachTip={showCoachTip == "intro"}
       />
+
+      {/* Fake desktop */}
       <div style={{
         width:"100%",
-        height:"40px",
+        height:"38px",
         background:"#454645",
       }}>
         <img src={process.env.PUBLIC_URL + '/images/menu_bar_1.png'} 
         alt="Menu bar" 
-        style={{width:'380px', height:'26px', marginTop:"6px", marginLeft:"4px"}}
+        style={{width:'380px', height:'26px', marginTop:"5px", marginLeft:"4px"}}
       />
       </div>
       <div style={{
@@ -326,40 +329,7 @@ function Assistant(props) {
         <div style={{flex:1, background:"none"}}>
           <DialogPanelAssistant message={message}/>
         </div>
-        <div 
-          onClick={sendQuestion}
-          style={{
-            height:"80px", 
-            background:"#fff", 
-            border: "1px solid #AEBBCC", 
-            padding:"12px",
-            marginBottom:"12px",
-            borderRadius:"4px",
-        }}>
-          <span className="material-icons" style={{ fontSize: "20px", color: "#222" }}>
-            mic
-          </span>
-        </div>
-        
-        <div onClick={sendQuestion}
-          style={{
-            display: "flex",
-            cursor:"pointer",
-            height:"40px", 
-            backgroundd:"yellow", 
-            alignContent:"center", 
-            justifyContent:"center"}}>
-          <span 
-            className="material-icons-outlined" 
-            style={{
-              fontSize: "26px",
-              fontWeight: "500", 
-              color: "#333", 
-            }}>
-            message
-          </span>
-        </div>
-        
+        <UserInput sendQuestion={sendQuestion} userInput={userInput} micActive={micActive} />
       </motion.div>
     </div>
   );
