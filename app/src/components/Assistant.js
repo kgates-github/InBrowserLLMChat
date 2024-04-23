@@ -113,16 +113,12 @@ function Assistant(props) {
   }
 
   const handleNoGesture = (e) => {
-    // If we detect a no gesture, when in ready mode, revert to dormant and stop listening
-
-    console.log('handleNoGesture -- chatStateRef.current ' + chatStateRef.current)
     if (chatStateRef.current === 'ready') {
       setChatState('dormant');
       setRecognitionIsStarted(false);
       setMicActive(false);
       recognition.stop();
     }
-
   }
 
   const handleThumbUp = (e, setChatIsOpen) => {
@@ -157,13 +153,13 @@ function Assistant(props) {
     if (llmInference != null) {
       // Set active here
       setIsLoaded(true); 
-      // setShowCoachTip("intro");
-
+      
       recognition.onend = function(e) {
         console.log("ONEND!!!!!!!!")
         recognition.stop();
         setRecognitionIsStarted(false);
         setMicActive(false);
+        setUserInput("");
         //if (chatState === 'ready') setChatState('dormant');
         if (userInput && userInput.length > 0) sendQuestion(llmInference, userInput, chatPrompts);
       };  
@@ -212,7 +208,7 @@ function Assistant(props) {
       y: 70,
       opacity: 1,
       rotate: 0,
-      transition: { duration: 0.2, ease: 'backOut' }
+      transition: { duration: 0.2, ease: 'easeInOut', delay: 0, type: 'spring', stiffness: 600, damping: 20 }
     },
     dormant: {
       x: -36,

@@ -6,18 +6,17 @@ import { LogContext } from './LogContext';
 function UserInput(props) {
   const log = useContext(LogContext);
 
-  const variants = {
-    open: {
-      opacity: 1,
-      scale: 1,
-      y: -60,
-      transition: { duration: 0.3, ease: 'easeInOut', delay: 0.4, type: 'spring', stiffness: 400, damping: 20 }
+  const variantsMic = {
+    on: {
+      color: ["#aaa", "#222"], // array of colors to cycle through
+      transition: {
+        duration: 0.2, // duration of one cycle
+        repeat: Infinity, // repeat the cycle indefinitely
+        repeatType: "reverse",
+      },
     },
-    closed: {
-      opacity: 0,
-      scale: 0.9,
-      y: -50,
-      transition: { duration: 0.1, ease: 'easeInOut', delay: 0 }
+    off: {
+      color: "#222", // static color when not blinking
     },
     
   }
@@ -34,9 +33,18 @@ function UserInput(props) {
           marginBottom:"12px",
           borderRadius:"4px",
       }}>
-        {props.userInput} <span className="material-icons" style={{ fontSize: "20px", color: "#222" }}>
-          mic
-        </span>
+        <div style={{float:"left", width:"20px", height:"20px", borderRadius:"50%", background:"none", marginRight:"8px"}}>
+          <motion.span 
+            className="material-icons" 
+            animate={props.micActive ? "on" : "off"}
+            initial="off"
+            variants={variantsMic}
+            style={{
+              fontSize: "20px", 
+            }}>
+            mic
+          </motion.span> 
+        </div>{props.userInput}
       </div>
       
       <div 
