@@ -1,6 +1,7 @@
 import getLlmInference from './llm_inference';
 import React, { useState, useEffect, useRef } from 'react';
 import DialogPanelAssistant from './DialogPanelAssistant';
+import DialogPanelUser from './DialogPanelUser';
 import CoachTip from './CoachTip';
 import UserInput from './UserInput';
 import { motion } from "framer-motion"
@@ -15,6 +16,7 @@ function Assistant(props) {
   const [llmInference, setLlmInference] = useState(null);
   const [llmIsProcessing, setLlmIsProcessing] = useState(false);
   const [chatState, setChatState] = useState('dormant');
+  const [chatDialog, setChatDialog] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [micActive, setMicActive] = useState(false);
   const [recognitionIsStarted, setRecognitionIsStarted] = useState(false);
@@ -23,6 +25,7 @@ function Assistant(props) {
   const [message, setMessage] = useState("");
   const [chatPrompts, setChatPrompts] = useState("");
 
+  const chatStateRef = useRef(chatState);
 
   /****************************************
     Miscellaneous Functions
@@ -75,6 +78,7 @@ function Assistant(props) {
     console.log('*********************/n')
 
     setChatPrompts(prompt);
+    setChatDialog([...chatDialog, {speaker: 'user', message: userInput}]);
 
     llmInference.generateResponse(prompt, (partialResults, complete, chatPrompts) => displayPartialResults(partialResults, complete, chatPrompts));
   }
@@ -96,26 +100,29 @@ function Assistant(props) {
   *****************************************/
 
   const handleOpenPalm = (e) => {
-    console.log('handleOpenPalm -----------------------');
+    console.log('handleOpenPalm -- chatStateRef.current ' + chatStateRef.current);
     
-    if (chatState === 'dormant') {
-      // Turn on mic and listen for speech
-      recognition.stop();
-      if (!recognitionIsStarted) recognition.start();
-      setRecognitionIsStarted(true);
-      setMicActive(true);
+    if (chatStateRef.current === 'dormant') {
       setChatState('ready');
     }
-    props.subscribe("No_Gesture", (e) => handleNoGesture(e));
+    // Turn on mic and listen for speech
+    recognition.stop();
+    if (!recognitionIsStarted) recognition.start();
+    setRecognitionIsStarted(true);
+    setMicActive(true);
   }
 
   const handleNoGesture = (e) => {
-    console.log('handleNoGesture');
-    
-    setRecognitionIsStarted(false);
-    setMicActive(false);
-    recognition.stop();
-    if (chatState === 'ready') setChatState('dormant');
+    // If we detect a no gesture, when in ready mode, revert to dormant and stop listening
+
+    console.log('handleNoGesture -- chatStateRef.current ' + chatStateRef.current)
+    if (chatStateRef.current === 'ready') {
+      setChatState('dormant');
+      setRecognitionIsStarted(false);
+      setMicActive(false);
+      recognition.stop();
+    }
+
   }
 
   const handleThumbUp = (e, setChatIsOpen) => {
@@ -128,9 +135,10 @@ function Assistant(props) {
   *****************************************/
 
   useEffect(() => { 
-    props.subscribe("Open_Palm", (e) => 
-      handleOpenPalm(e)
-    );
+    console.log('chatState === ', chatState);
+    props.subscribe("Open_Palm", (e) => handleOpenPalm(e));
+    props.subscribe("No_Gesture", (e) => handleNoGesture(e));
+    //props.subscribe("No_Gesture", (e, chatState) => handleNoGesture(e, chatState)(chatState));
 
     getLlmInference().then(result => {
       setLlmInference(result);
@@ -139,35 +147,46 @@ function Assistant(props) {
     });
   }, []);
 
+  useEffect(() => {
+    chatStateRef.current = chatState;
+    console.log(' useEffect chatStateRef.current === ', chatStateRef.current);
+  }, [chatState]);
+
+
   useEffect(() => {  
     if (llmInference != null) {
       // Set active here
       setIsLoaded(true); 
-      setShowCoachTip("intro");
+      // setShowCoachTip("intro");
 
       recognition.onend = function(e) {
+        console.log("ONEND!!!!!!!!")
         recognition.stop();
         setRecognitionIsStarted(false);
         setMicActive(false);
-        if (chatState === 'ready') setChatState('dormant');
-        sendQuestion(llmInference, userInput, chatPrompts);
+        //if (chatState === 'ready') setChatState('dormant');
+        if (userInput && userInput.length > 0) sendQuestion(llmInference, userInput, chatPrompts);
       };  
     }
-  } , [llmInference, userInput, chatPrompts]);
+  }, [llmInference, userInput, chatPrompts]);
 
   useEffect(() => {  
-    if (isLoaded && chatState === 'dormant') {
-      setShowCoachTip('intro')
+    console.log('222 chatState === ', chatState);
+    if (isLoaded && chatState == 'dormant') {
+      setShowCoachTip("intro")
+    } else if (chatState === 'open') {
+      console.log('chatState === open!!!!!')
+      setShowCoachTip('none')
     } else {
-      setShowCoachTip(null)
+      setShowCoachTip('none')
     }
-  } , [chatState, isLoaded]);
+  }, [chatState, isLoaded]);
   
-  useEffect(() => {  
+  /*useEffect(() => {  
     if (isLoaded) {
       setShowCoachTip('intro')
     }
-  } , [isLoaded]);
+  }, [isLoaded]);*/
 
   /****************************************
     Animation variants
@@ -215,7 +234,7 @@ function Assistant(props) {
         image={"icon_palm_open"} 
         text1={''}
         text2={'Raise your hand and say something...'}
-        showCoachTip={showCoachTip == "intro"}
+        showCoachTip={showCoachTip === "intro" ? true : false}
       />
 
       {/* Fake desktop */}
@@ -327,7 +346,12 @@ function Assistant(props) {
           </span>
         </div>
         <div style={{flex:1, background:"none"}}>
-          <DialogPanelAssistant message={message}/>
+          {chatDialog.map((dialog, index) => {
+            return (
+              <DialogPanelUser key={"user_dialog_"+index} message={dialog.message}/>
+            )
+          })}
+           <DialogPanelAssistant message={message}/>
         </div>
         <UserInput sendQuestion={sendQuestion} userInput={userInput} micActive={micActive} />
       </motion.div>

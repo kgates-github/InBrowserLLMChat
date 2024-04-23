@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { motion } from "framer-motion"
 import { LogContext } from './LogContext';
 
@@ -19,8 +19,13 @@ function CoachTip(props) {
       y: -50,
       transition: { duration: 0.1, ease: 'easeInOut', delay: 0 }
     },
-    
   }
+
+  useEffect(() => { 
+    if (props.showCoachTip) {
+      console.log('CoachTip: ' + props.text2);
+    }
+  }, [props]);
 
   return (
     <div style={{
