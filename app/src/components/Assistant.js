@@ -22,10 +22,20 @@ function Assistant(props) {
   const [recognitionIsStarted, setRecognitionIsStarted] = useState(false);
   const [showCoachTip, setShowCoachTip] = useState(null);
   const [userInput, setUserInput] = useState(null);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(null);
   const [chatPrompts, setChatPrompts] = useState("");
 
+  
+  /****************************************
+    Miscellaneous Functions
+  *****************************************/
+
   const chatStateRef = useRef(chatState);
+  const chatDialogRef = useRef(chatDialog);
+  const chatPromptsRef = useRef(chatPrompts);
+  const llmIsProcessingRef = useRef(llmIsProcessing);
+  const chatDialogDivRef = useRef(null);
+
 
   /****************************************
     Miscellaneous Functions
@@ -56,9 +66,11 @@ function Assistant(props) {
     setMessage(partialMessage);
   
     if (complete) {
-      //const setChatPrompts = getSetChatPrompts();
+      setLlmIsProcessing(false);
+      setMessage(null);
+      setChatDialog([...chatDialogRef.current, {speaker: 'assistant', message: partialMessage}]);
 
-      const prompt = `${chatPrompts}
+      const prompt = `${chatPromptsRef.current}
       ${partialMessage}<end_of_turn>`
 
       setChatPrompts(prompt);
@@ -67,20 +79,33 @@ function Assistant(props) {
 
   function sendQuestion(llmInference, userInput, chatPrompts) { 
     partialMessage = ""; 
-    
-    const prompt = `${chatPrompts}
-    <start_of_turn>user
-    ${userInput}<end_of_turn>
-    <start_of_turn>model`
+    let prompt = "";
 
-    console.log('/n*********************')
-    console.log('prompt', prompt)
-    console.log('*********************/n')
+    // If our prompt gets too long, reset it
+    if (chatPrompts.length < 2000) {
+      prompt += chatPrompts;
+    } else {
+      setChatPrompts("");
+    }
+    prompt += `<start_of_turn>user
+      ${userInput}<end_of_turn>
+      <start_of_turn>model`
 
     setChatPrompts(prompt);
     setChatDialog([...chatDialog, {speaker: 'user', message: userInput}]);
 
-    llmInference.generateResponse(prompt, (partialResults, complete, chatPrompts) => displayPartialResults(partialResults, complete, chatPrompts));
+    if (!llmIsProcessingRef.current) {
+      try {
+        setLlmIsProcessing(true);
+
+        llmInference.generateResponse(
+          prompt, 
+          (partialResults, complete, chatPrompts) => displayPartialResults(partialResults, complete, chatPrompts)
+        );
+      } catch (error) {
+        console.log('Error generating response: ', error);
+      }
+    }
   }
 
   /****************************************
@@ -100,16 +125,21 @@ function Assistant(props) {
   *****************************************/
 
   const handleOpenPalm = (e) => {
-    console.log('handleOpenPalm -- chatStateRef.current ' + chatStateRef.current);
-    
     if (chatStateRef.current === 'dormant') {
       setChatState('ready');
     }
+    
     // Turn on mic and listen for speech
-    recognition.stop();
-    if (!recognitionIsStarted) recognition.start();
-    setRecognitionIsStarted(true);
-    setMicActive(true);
+    if (!recognitionIsStarted) {
+      recognition.stop();
+      try {
+        recognition.start();
+        setRecognitionIsStarted(true);
+        setMicActive(true);
+      } catch (error) {
+        console.log('Error starting recognition: ', error);
+      }
+    }
   }
 
   const handleNoGesture = (e) => {
@@ -131,10 +161,8 @@ function Assistant(props) {
   *****************************************/
 
   useEffect(() => { 
-    console.log('chatState === ', chatState);
     props.subscribe("Open_Palm", (e) => handleOpenPalm(e));
     props.subscribe("No_Gesture", (e) => handleNoGesture(e));
-    //props.subscribe("No_Gesture", (e, chatState) => handleNoGesture(e, chatState)(chatState));
 
     getLlmInference().then(result => {
       setLlmInference(result);
@@ -143,11 +171,23 @@ function Assistant(props) {
     });
   }, []);
 
+
+  useEffect(() => {
+    chatPromptsRef.current = chatPrompts;
+  }, [chatPrompts]);
+
   useEffect(() => {
     chatStateRef.current = chatState;
-    console.log(' useEffect chatStateRef.current === ', chatStateRef.current);
   }, [chatState]);
 
+  useEffect(() => {
+    llmIsProcessingRef.current = llmIsProcessing;
+  }, [llmIsProcessing]);
+
+  useEffect(() => {
+    chatDialogRef.current = chatDialog;
+    chatDialogDivRef.current.scrollTop = chatDialogDivRef.current.scrollHeight;
+  }, [chatDialog, message]);
 
   useEffect(() => {  
     if (llmInference != null) {
@@ -155,7 +195,6 @@ function Assistant(props) {
       setIsLoaded(true); 
       
       recognition.onend = function(e) {
-        console.log("ONEND!!!!!!!!")
         recognition.stop();
         setRecognitionIsStarted(false);
         setMicActive(false);
@@ -167,22 +206,15 @@ function Assistant(props) {
   }, [llmInference, userInput, chatPrompts]);
 
   useEffect(() => {  
-    console.log('222 chatState === ', chatState);
     if (isLoaded && chatState == 'dormant') {
       setShowCoachTip("intro")
     } else if (chatState === 'open') {
-      console.log('chatState === open!!!!!')
       setShowCoachTip('none')
     } else {
       setShowCoachTip('none')
     }
   }, [chatState, isLoaded]);
   
-  /*useEffect(() => {  
-    if (isLoaded) {
-      setShowCoachTip('intro')
-    }
-  }, [isLoaded]);*/
 
   /****************************************
     Animation variants
@@ -229,7 +261,7 @@ function Assistant(props) {
       <CoachTip 
         image={"icon_palm_open"} 
         text1={''}
-        text2={'Raise your hand and say something...'}
+        text2={'Raise your hand and say hello!'}
         showCoachTip={showCoachTip === "intro" ? true : false}
       />
 
@@ -238,11 +270,22 @@ function Assistant(props) {
         width:"100%",
         height:"38px",
         background:"#454645",
+        display:"flex",
+        flexDirection:"row",
       }}>
-        <img src={process.env.PUBLIC_URL + '/images/menu_bar_1.png'} 
-        alt="Menu bar" 
-        style={{width:'380px', height:'26px', marginTop:"5px", marginLeft:"4px"}}
-      />
+        <div>
+          <img src={process.env.PUBLIC_URL + '/images/menu_bar_1.png'} 
+            alt="Menu bar" 
+            style={{width:'380px', height:'26px', marginTop:"5px", marginLeft:"10px"}}
+          />
+        </div>
+        <div style={{flex:1}}></div>
+        <div>
+          <img src={process.env.PUBLIC_URL + '/images/menu_bar_2.png'} 
+            alt="Menu bar" 
+            style={{width:'558px', height:'23px', marginTop:"6px", marginRight:"4px"}}
+          />
+        </div>
       </div>
       <div style={{
         position:"fixed",
@@ -341,13 +384,26 @@ function Assistant(props) {
             close
           </span>
         </div>
-        <div style={{flex:1, background:"none"}}>
+        <div 
+          id="chat-dialog"
+          ref={chatDialogDivRef}
+          style={{
+            flex:1, 
+            background:"none", 
+            overflowY:"scroll",
+            minHeight:"0px", 
+          }}
+        >
           {chatDialog.map((dialog, index) => {
-            return (
-              <DialogPanelUser key={"user_dialog_"+index} message={dialog.message}/>
-            )
+            if (dialog.speaker === "user") {
+              return <DialogPanelUser key={"user_dialog_"+index} message={dialog.message}/>;
+            } else if (dialog.speaker === "assistant") {
+              return <DialogPanelAssistant key={"assistant_dialog_"+index} message={dialog.message}/>;
+            }
           })}
-           <DialogPanelAssistant message={message}/>
+           <DialogPanelAssistant 
+            message={message}
+          />
         </div>
         <UserInput sendQuestion={sendQuestion} userInput={userInput} micActive={micActive} />
       </motion.div>

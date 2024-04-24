@@ -8,23 +8,23 @@ function UserInput(props) {
 
   const variantsMic = {
     on: {
-      color: ["#aaa", "#222"], // array of colors to cycle through
+      opacity: 1,
+      color: ["#aaa", "#111"], // array of colors to cycle through
       transition: {
-        duration: 0.2, // duration of one cycle
+        duration: 0.3, // duration of one cycle
         repeat: Infinity, // repeat the cycle indefinitely
         repeatType: "reverse",
       },
     },
     off: {
+      opacity: 0,
       color: "#222", // static color when not blinking
     },
-    
   }
 
   return (
     <>
       <div 
-        onClick={props.sendQuestion}
         style={{
           height:"80px", 
           background:"#fff", 
@@ -33,6 +33,21 @@ function UserInput(props) {
           marginBottom:"12px",
           borderRadius:"4px",
       }}>
+        {/* Hint */}
+        <div style={{ 
+          position:"absolute", 
+          width:"340px", 
+          height:"80px", 
+          background:"none",
+          display: props.micActive ? "none" : "flex",
+          justifyContent:"center",
+          alignItems:"center",
+        }}> 
+          <img src={process.env.PUBLIC_URL + '/svg/coachtip_hand_mic.svg'} 
+            alt="open hand = mic" 
+            style={{width:'auto', height:'auto',}}
+          />
+        </div>
         <div style={{float:"left", width:"20px", height:"20px", borderRadius:"50%", background:"none", marginRight:"8px"}}>
           <motion.span 
             className="material-icons" 

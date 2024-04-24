@@ -9,7 +9,10 @@ function DialogPanelAssistant(props) {
   }, []);
 
   return (
-    <div style={{marginBottom:"20px", }}>
+    <div style={{
+      marginBottom:"20px", 
+      display: props.message ? "block" : "none",
+    }}>
       <div style={{
         display:"flex",
         flexDirection:"row",
