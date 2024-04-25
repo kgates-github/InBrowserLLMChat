@@ -25,7 +25,7 @@ function Assistant(props) {
   const [message, setMessage] = useState(null);
   const [chatPrompts, setChatPrompts] = useState("");
 
-  
+
   /****************************************
     Miscellaneous Functions
   *****************************************/
@@ -41,6 +41,21 @@ function Assistant(props) {
     Miscellaneous Functions
   *****************************************/
 
+  const turnOnMic = () => {
+    console.log('turnOnMic recognitionIsStarted: ', recognitionIsStarted);
+    // Turn on mic and listen for speech
+    if (!recognitionIsStarted) {
+      recognition.stop();
+      try {
+        recognition.start();
+        setRecognitionIsStarted(true);
+        setMicActive(true);
+      } catch (error) {
+        console.log('Error starting recognition: ', error);
+      }
+    }
+  }
+
   const closeChat = () => {
     recognition.stop();
     setChatState('dormant');
@@ -48,8 +63,8 @@ function Assistant(props) {
     setMicActive(false);
   }
 
-  function getSetChatPrompts() {
-    return setChatPrompts;
+  const manualSend = (text) => {
+    sendQuestion(llmInference, text, chatPrompts);
   }
 
   /****************************************
@@ -82,7 +97,7 @@ function Assistant(props) {
     let prompt = "";
 
     // If our prompt gets too long, reset it
-    if (chatPrompts.length < 2000) {
+    if (chatPrompts.length < 1000) {
       prompt += chatPrompts;
     } else {
       setChatPrompts("");
@@ -91,13 +106,14 @@ function Assistant(props) {
       ${userInput}<end_of_turn>
       <start_of_turn>model`
 
+    console.log('Prompt.length: ', prompt.length);
+
     setChatPrompts(prompt);
     setChatDialog([...chatDialog, {speaker: 'user', message: userInput}]);
 
     if (!llmIsProcessingRef.current) {
       try {
         setLlmIsProcessing(true);
-
         llmInference.generateResponse(
           prompt, 
           (partialResults, complete, chatPrompts) => displayPartialResults(partialResults, complete, chatPrompts)
@@ -107,6 +123,7 @@ function Assistant(props) {
       }
     }
   }
+
 
   /****************************************
     Speech recognition functions
@@ -120,6 +137,7 @@ function Assistant(props) {
     setUserInput(transcript.charAt(0).toUpperCase() + transcript.slice(1));
   };
 
+
   /****************************************
     Gesture Handlers
   *****************************************/
@@ -129,17 +147,7 @@ function Assistant(props) {
       setChatState('ready');
     }
     
-    // Turn on mic and listen for speech
-    if (!recognitionIsStarted) {
-      recognition.stop();
-      try {
-        recognition.start();
-        setRecognitionIsStarted(true);
-        setMicActive(true);
-      } catch (error) {
-        console.log('Error starting recognition: ', error);
-      }
-    }
+    turnOnMic();
   }
 
   const handleNoGesture = (e) => {
@@ -155,6 +163,7 @@ function Assistant(props) {
     console.log('handleThumbUp');
     setChatIsOpen(false)
   }
+
 
   /****************************************
     useEffects
@@ -371,7 +380,7 @@ function Assistant(props) {
         animate={chatState}
         initial="dormant"
         variants={vaiantsChatWindowMain}>
-        <div style={{justifyContent:"flex-end", display:"flex", marginBottom:"20px"}}>
+        <div style={{justifyContent:"flex-end", display:"flex", height:"24px", background:"white"}}>
           <span 
             onClick={closeChat}
             className="material-icons" 
@@ -394,6 +403,24 @@ function Assistant(props) {
             minHeight:"0px", 
           }}
         >
+        <div style={{
+          position:"absolute", 
+          top:"36px", 
+          left:"0px", 
+          width:"360px", 
+          height:"30px", 
+          background: "linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0))"
+        }}></div>
+        <div style={{
+          position:"absolute", 
+          bottom:"150px", 
+          left:"0px", 
+          width:"360px", 
+          height:"30px", 
+          background: "linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1))"
+        }}></div>
+
+          <div style={{height:"20px"}}></div>
           {chatDialog.map((dialog, index) => {
             if (dialog.speaker === "user") {
               return <DialogPanelUser key={"user_dialog_"+index} message={dialog.message}/>;
@@ -405,7 +432,13 @@ function Assistant(props) {
             message={message}
           />
         </div>
-        <UserInput sendQuestion={sendQuestion} userInput={userInput} micActive={micActive} />
+        <UserInput 
+          sendQuestion={sendQuestion} 
+          userInput={userInput} 
+          micActive={micActive} 
+          setMicActive={setMicActive}
+          manualSend={manualSend}
+        />
       </motion.div>
     </div>
   );

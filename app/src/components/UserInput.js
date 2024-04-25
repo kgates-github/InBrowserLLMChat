@@ -1,10 +1,28 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useRef, useEffect } from 'react';
 import { motion } from "framer-motion"
 import { LogContext } from './LogContext';
 
 
 function UserInput(props) {
   const log = useContext(LogContext);
+  const [isManualMode, setIsManualMode] = useState(false);
+  const divRef = useRef(null);
+
+  const manualSend = () => {
+    const text = divRef.current.innerText;
+    props.manualSend(text);
+    divRef.current.innerText = "";
+  }
+
+
+
+  useEffect(() => {
+    if (isManualMode && divRef.current) {
+      divRef.current.focus();
+    } else if (!isManualMode && divRef.current) {
+      divRef.current.blur();
+    }
+  }, [isManualMode]);
 
   const variantsMic = {
     on: {
@@ -23,11 +41,20 @@ function UserInput(props) {
   }
 
   return (
-    <>
-      <div 
+    <div 
+      onMouseEnter={() => {
+        setIsManualMode(true); 
+        //props.setMicActive(false)
+      }}
+      onMouseLeave={() => {
+        setIsManualMode(false)
+        //props.setMicActive(true)
+      }}
+    >
+      <div
         style={{
           height:"80px", 
-          background:"#fff", 
+          background:"white", 
           border: "1px solid #AEBBCC", 
           padding:"8px",
           marginBottom:"12px",
@@ -39,7 +66,7 @@ function UserInput(props) {
           width:"340px", 
           height:"80px", 
           background:"none",
-          display: props.micActive ? "none" : "flex",
+          display: props.micActive || isManualMode ? "none" : "flex",
           justifyContent:"center",
           alignItems:"center",
         }}> 
@@ -48,7 +75,19 @@ function UserInput(props) {
             style={{width:'auto', height:'auto',}}
           />
         </div>
-        <div style={{float:"left", width:"20px", height:"20px", borderRadius:"50%", background:"none", marginRight:"8px"}}>
+        
+        {/* Text */}
+        <div 
+          style={{
+            float:"left", 
+            width:"20px", 
+            height:"20px", 
+            borderRadius:"50%", 
+            background:"none", 
+            marginRight:"8px",
+            display: props.micActive ? "block" : "none",
+          }}
+        >
           <motion.span 
             className="material-icons" 
             animate={props.micActive ? "on" : "off"}
@@ -60,7 +99,24 @@ function UserInput(props) {
             mic
           </motion.span> 
         </div>{props.userInput}
+        <div 
+        ref={divRef}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault(); // Prevents the addition of a new line
+            manualSend();
+          }
+        }}
+        contentEditable={isManualMode}
+        style={{
+          position:"absolute",
+          width:"340px", 
+          height:"80px",  
+          background:"white",
+          display: isManualMode ? "block" : "none",
+        }}></div>
       </div>
+
       
       <div 
         style={{
@@ -81,15 +137,30 @@ function UserInput(props) {
           }}>
           task
         </span>
-        <span 
-          className="material-icons-outlined" 
-          style={{
-            fontSize: "24px",
-            fontWeight: "500", 
-            color: "#333", 
-          }}>
-          chat
-        </span>
+        {isManualMode ? (
+          <span 
+            className="material-icons" 
+            onClick={() => manualSend()}
+            style={{
+              fontSize: "24px",
+              fontWeight: "500", 
+              color: "#333", 
+              cursor:"pointer",
+            }}>
+            send
+          </span>
+        ) : (
+          <span 
+
+            className="material-icons-outlined" 
+            style={{
+              fontSize: "24px",
+              fontWeight: "500", 
+              color: "#333", 
+            }}>
+            chat
+          </span>
+        )}
         <span 
           className="material-icons-outlined" 
           style={{
@@ -100,7 +171,7 @@ function UserInput(props) {
           notifications
         </span>
       </div>
-    </>
+    </div>
   );
 }
 
