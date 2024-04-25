@@ -24,6 +24,7 @@ function Assistant(props) {
   const [userInput, setUserInput] = useState(null);
   const [message, setMessage] = useState(null);
   const [chatPrompts, setChatPrompts] = useState("");
+  const [showMicHint, setShowMicHint] = useState(true);
 
 
   /****************************************
@@ -50,6 +51,7 @@ function Assistant(props) {
         recognition.start();
         setRecognitionIsStarted(true);
         setMicActive(true);
+        setShowMicHint(false);
       } catch (error) {
         console.log('Error starting recognition: ', error);
       }
@@ -92,7 +94,8 @@ function Assistant(props) {
     }
   }
 
-  function sendQuestion(llmInference, userInput, chatPrompts) { 
+
+  function promptLLM(llmInference, userInput, chatPrompts) {
     partialMessage = ""; 
     let prompt = "";
 
@@ -122,6 +125,23 @@ function Assistant(props) {
         console.log('Error generating response: ', error);
       }
     }
+  }
+
+  function sendQuestion(llmInference, userInput, chatPrompts) { 
+    const spans = document.querySelectorAll('.word');
+    setMicActive(false);
+
+    spans.forEach((span, index) => {
+      setTimeout(() => {
+        span.style.color = "#000";
+      }, index * 140);
+    });
+    
+    setTimeout(() => {
+      setUserInput("");
+      setShowMicHint(true);
+      promptLLM(llmInference, userInput, chatPrompts) 
+    }, (spans.length + 1) * 140);
   }
 
 
@@ -155,6 +175,7 @@ function Assistant(props) {
       setChatState('dormant');
       setRecognitionIsStarted(false);
       setMicActive(false);
+      setShowMicHint(true);
       recognition.stop();
     }
   }
@@ -206,8 +227,6 @@ function Assistant(props) {
       recognition.onend = function(e) {
         recognition.stop();
         setRecognitionIsStarted(false);
-        setMicActive(false);
-        setUserInput("");
         //if (chatState === 'ready') setChatState('dormant');
         if (userInput && userInput.length > 0) sendQuestion(llmInference, userInput, chatPrompts);
       };  
@@ -438,6 +457,7 @@ function Assistant(props) {
           micActive={micActive} 
           setMicActive={setMicActive}
           manualSend={manualSend}
+          showMicHint={showMicHint}
         />
       </motion.div>
     </div>

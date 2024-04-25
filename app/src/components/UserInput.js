@@ -14,7 +14,18 @@ function UserInput(props) {
     divRef.current.innerText = "";
   }
 
-
+  const formatTranscription = (transcription) => {
+    const words = transcription.split(' ');
+    
+    return words.map((word, index) => {
+      return (
+        <span 
+          className='word'
+          style={{color:"#999"}} 
+          key={index}>{word} </span>
+      );
+    });
+  }
 
   useEffect(() => {
     if (isManualMode && divRef.current) {
@@ -24,19 +35,23 @@ function UserInput(props) {
     }
   }, [isManualMode]);
 
+  useEffect(() => {
+    console.log("props.showMicHint: " + props.showMicHint)
+  }, [props.showMicHint]);
+
   const variantsMic = {
     on: {
       opacity: 1,
-      color: ["#aaa", "#111"], // array of colors to cycle through
+      color: ["#eee", "#000"], // array of colors to cycle through
       transition: {
-        duration: 0.3, // duration of one cycle
+        duration: 0.25, // duration of one cycle
         repeat: Infinity, // repeat the cycle indefinitely
         repeatType: "reverse",
       },
     },
     off: {
-      opacity: 0,
-      color: "#222", // static color when not blinking
+      opacity: 1,
+      color: "#ccc", // static color when not blinking
     },
   }
 
@@ -66,7 +81,7 @@ function UserInput(props) {
           width:"340px", 
           height:"80px", 
           background:"none",
-          display: props.micActive || isManualMode ? "none" : "flex",
+          display: !props.showMicHint || isManualMode ? "none" : "flex",
           justifyContent:"center",
           alignItems:"center",
         }}> 
@@ -78,6 +93,7 @@ function UserInput(props) {
         
         {/* Text */}
         <div 
+          id="audioInput"
           style={{
             float:"left", 
             width:"20px", 
@@ -85,7 +101,7 @@ function UserInput(props) {
             borderRadius:"50%", 
             background:"none", 
             marginRight:"8px",
-            display: props.micActive ? "block" : "none",
+            display: props.micActive ? "block" : "block",
           }}
         >
           <motion.span 
@@ -98,7 +114,10 @@ function UserInput(props) {
             }}>
             mic
           </motion.span> 
-        </div>{props.userInput}
+        </div>{(props.userInput && props.userInput.length > 0) ? 
+            formatTranscription(props.userInput) 
+            : 
+            "" }
         <div 
         ref={divRef}
         onKeyDown={(e) => {
@@ -150,8 +169,7 @@ function UserInput(props) {
             send
           </span>
         ) : (
-          <span 
-
+          <span
             className="material-icons-outlined" 
             style={{
               fontSize: "24px",
