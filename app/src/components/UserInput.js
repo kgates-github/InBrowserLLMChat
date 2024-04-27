@@ -36,8 +36,8 @@ function UserInput(props) {
   }, [isManualMode]);
 
   useEffect(() => {
-    console.log("props.showMicHint: " + props.showMicHint)
-  }, [props.showMicHint]);
+    console.log("UserInput props.micActive: " + props.micActive)
+  }, [props.micActive]);
 
   const variantsMic = {
     on: {
@@ -110,7 +110,7 @@ function UserInput(props) {
             initial="off"
             variants={variantsMic}
             style={{
-              fontSize: "20px", 
+              fontSize: "24px", 
             }}>
             mic
           </motion.span> 

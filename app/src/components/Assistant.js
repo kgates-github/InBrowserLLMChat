@@ -9,8 +9,76 @@ import '../App.css';
 import '../Assistant.css';
 
 let recognition = new window.webkitSpeechRecognition();
-recognition.lang = 'en-US'; // Set language
-recognition.interimResults = true; // Get interim results
+recognition.lang = 'en-US';
+recognition.interimResults = true; 
+
+/*
+Create a supplement object. It will fetch info (timer to fake it)
+It will have a callback (createSupplement)
+createSupplement will find id and add to the supplement object
+*/
+
+class ToDoItem {
+  constructor(spec, callback) {
+    this.spec = spec;
+    this.spec.text = "This is a to-do item";
+    this.spec.color = "#ff5500";
+    this.spec.icon = "task";
+    this.callback = callback;
+
+    setTimeout(() => {
+      this.callback(this.spec)
+    }, Math.random() * 5000 + 1000);
+  }
+}
+
+class InfoItem {
+  constructor(spec, callback) {
+    this.spec = spec;
+    this.spec.text = "More information about this topic.";
+    this.spec.color = "#0182DF";
+    this.spec.icon = "info";
+    this.callback = callback;
+
+    setTimeout(() => {
+      this.callback(this.spec)
+    }, Math.random() * 5000 + 1000);
+  }
+}
+
+class TaskItem {
+  constructor(spec, callback) {
+    this.spec = spec;
+    this.spec.text = "Task in progrees";
+    this.spec.color = "#5B5B5B";
+    this.spec.icon = "schedule";
+    this.callback = callback;
+
+    setTimeout(() => {
+      this.callback(this.spec)
+    }, Math.random() * 500 + 100);
+  }
+}
+
+class SupplementFetcher {
+  constructor() {
+    console.log('SupplementFetcher constructor');
+  }
+
+  fetchSupplement(spec, callback) {
+    if (spec.type === "todo") {
+      new ToDoItem(spec, callback);
+    } else if (spec.type === "info") {
+      new InfoItem(spec, callback);
+    } else if (spec.type === "task") {
+      new TaskItem(spec, callback);
+    }
+  }
+}
+
+const supplementFetcher = new SupplementFetcher(); 
+
+
 
 function Assistant(props) {
   const [llmInference, setLlmInference] = useState(null);
@@ -25,6 +93,7 @@ function Assistant(props) {
   const [message, setMessage] = useState(null);
   const [chatPrompts, setChatPrompts] = useState("");
   const [showMicHint, setShowMicHint] = useState(true);
+  const [supplementWindowState, setSupplementWindowState] = useState('dormant');
 
 
   /****************************************
@@ -36,11 +105,16 @@ function Assistant(props) {
   const chatPromptsRef = useRef(chatPrompts);
   const llmIsProcessingRef = useRef(llmIsProcessing);
   const chatDialogDivRef = useRef(null);
+  const messageDivRef = useRef(null);
 
 
   /****************************************
     Miscellaneous Functions
   *****************************************/
+
+  function generateUUID() {
+    return crypto.randomUUID();
+  }
 
   const turnOnMic = () => {
     console.log('turnOnMic recognitionIsStarted: ', recognitionIsStarted);
@@ -69,6 +143,14 @@ function Assistant(props) {
     sendQuestion(llmInference, text, chatPrompts);
   }
 
+  function insertSupplement(spec) {  
+    console.log('insertSupplement: ', spec);
+
+    setChatDialog(chatDialog => chatDialog.map(dialog => 
+      dialog.id === spec.dialog_id ? {...dialog, supplement: spec} : dialog
+    ));
+  }
+
   /****************************************
     LLM Inference
   *****************************************/
@@ -81,11 +163,38 @@ function Assistant(props) {
   ) => {
     partialMessage += partialResults
     setMessage(partialMessage);
+    //messageDivRef.current.innerHTML = partialMessage;
   
     if (complete) {
       setLlmIsProcessing(false);
       setMessage(null);
-      setChatDialog([...chatDialogRef.current, {speaker: 'assistant', message: partialMessage}]);
+      //messageDivRef.current.innerHTML = "";
+
+      const uuid = generateUUID();
+
+      setChatDialog([
+        ...chatDialogRef.current, 
+        { 
+          id: uuid,
+          speaker: 'assistant', 
+          message: partialMessage,
+          supplement: null,
+        }
+      ]);
+
+      // Simulate getting a supplement
+      const types  = ["todo", "info", "task"];
+      if (Math.random() > 0.0)  {
+        supplementFetcher.fetchSupplement(
+          {
+            dialog_id: uuid,
+            type: types[Math.floor(Math.random() * types.length)],
+            text: "",
+            isCompleted: false,
+          },
+          insertSupplement
+        );
+      }
 
       const prompt = `${chatPromptsRef.current}
       ${partialMessage}<end_of_turn>`
@@ -93,7 +202,6 @@ function Assistant(props) {
       setChatPrompts(prompt);
     }
   }
-
 
   function promptLLM(llmInference, userInput, chatPrompts) {
     partialMessage = ""; 
@@ -177,6 +285,9 @@ function Assistant(props) {
       setMicActive(false);
       setShowMicHint(true);
       recognition.stop();
+    } else if (chatStateRef.current === 'open') {
+      setMicActive(false);
+      recognition.stop();
     }
   }
 
@@ -258,6 +369,20 @@ function Assistant(props) {
     dormant: {
       x: -340,
       opacity: 0,
+      transition: { duration: 0.3, ease: 'easeOut' }
+    }
+  }
+
+  const vaiantsSupplementWindow = {
+    open: {
+      x: 400,
+      opacity: 1,
+      transition: { duration: 0.3, ease: 'circInOut' }
+    },
+
+    dormant: {
+      x: 12,
+      opacity: 1,
       transition: { duration: 0.3, ease: 'easeOut' }
     }
   }
@@ -392,13 +517,14 @@ function Assistant(props) {
           fontWeight:"600",
         }}>?</div>
       </motion.div>
-
+      
       {/* Chat window */}
       <motion.div 
         className="chat-window-main"
         animate={chatState}
         initial="dormant"
         variants={vaiantsChatWindowMain}>
+        
         <div style={{justifyContent:"flex-end", display:"flex", height:"24px", background:"white"}}>
           <span 
             onClick={closeChat}
@@ -444,11 +570,16 @@ function Assistant(props) {
             if (dialog.speaker === "user") {
               return <DialogPanelUser key={"user_dialog_"+index} message={dialog.message}/>;
             } else if (dialog.speaker === "assistant") {
-              return <DialogPanelAssistant key={"assistant_dialog_"+index} message={dialog.message}/>;
+              return <DialogPanelAssistant 
+                        key={dialog.id} 
+                        message={dialog.message} 
+                        supplement={dialog.supplement}
+                      />;
             }
           })}
-           <DialogPanelAssistant 
+          <DialogPanelAssistant 
             message={message}
+            messageDivRef={messageDivRef}
           />
         </div>
         <UserInput 
@@ -465,3 +596,26 @@ function Assistant(props) {
 }
 
 export default Assistant; 
+
+
+{/* Supplement window 
+<motion.div 
+className="supplement-window-main"
+animate={supplementWindowState}
+initial="dormant"
+variants={vaiantsSupplementWindow}>
+<div style={{justifyContent:"flex-end", display:"flex", height:"24px", background:"white"}}>
+  <span 
+    onClick={closeChat}
+    className="material-icons" 
+    style={{
+      fontSize: "20px",
+      fontWeight: "500", 
+      color: "#333",
+      cursor:"pointer",
+    }}>
+    close
+  </span>
+</div>
+</motion.div>
+End supplement window */}

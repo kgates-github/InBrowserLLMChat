@@ -21,12 +21,6 @@ function CoachTip(props) {
     },
   }
 
-  useEffect(() => { 
-    if (props.showCoachTip) {
-      console.log('CoachTip: ' + props.text2);
-    }
-  }, [props]);
-
   return (
     <div style={{
       position:"fixed",

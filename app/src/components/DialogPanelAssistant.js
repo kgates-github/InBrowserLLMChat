@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import Supplement from './Supplement';
 import '../App.css';
 import '../Assistant.css';
 
 function DialogPanelAssistant(props) {
   
   useEffect(() => {   
-    
-  }, []);
+    console.log('props.supplement: ', props.supplement);
+  }, [props.supplement]);
 
   return (
     <div style={{
@@ -44,8 +45,13 @@ function DialogPanelAssistant(props) {
       }}>
         <div style={{width:"38px"}}></div>
         <div style={{fontFamily:"Source Sans Pro", flex:1, color:"#444", paddingRight:"20px"}}>
-          {props.message ? props.message : null} 
+          <div ref={props.messageDivRef}>{props.message ? props.message : null}</div>
+            {/* Supplements */}
+              {props.supplement != null ? <Supplement spec={props.supplement} isActive={true}/> : null}
+            {/* End Supplements */}
         </div>
+
+       
       </div>
     </div>
   );
@@ -54,6 +60,9 @@ function DialogPanelAssistant(props) {
 export default DialogPanelAssistant;
 
 {/*
+
+
+
 <div style={{
   display:"flex",
   flexDirection:"row",
