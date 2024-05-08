@@ -6,6 +6,8 @@ import { LogContext } from './LogContext';
 function UserInput(props) {
   const log = useContext(LogContext);
   const [isManualMode, setIsManualMode] = useState(false);
+  const [numTasks, setNumTasks] = useState(0);
+  const [numTodos, setNumTodos] = useState(0);
   const divRef = useRef(null);
 
   const manualSend = () => {
@@ -36,6 +38,25 @@ function UserInput(props) {
   }, [isManualMode]);
 
   useEffect(() => {
+    if (props.chatDialog) {
+      const numTodos = props.chatDialog.filter(
+        (dialog) => dialog.speaker == "assistant" && 
+                    dialog.supplement && 
+                    dialog.supplement.type == "todo" &&
+                    !dialog.supplement.isCompleted
+      ).length;
+      const numTasks = props.chatDialog.filter(
+        (dialog) => dialog.speaker == "assistant" && 
+                    dialog.supplement && 
+                    dialog.supplement.type == "task" &&
+                    !dialog.supplement.isCompleted
+      ).length;
+      setNumTasks(numTasks);
+      setNumTodos(numTodos);
+    }
+  }, [props.chatDialog]);
+
+  useEffect(() => {
     console.log("UserInput props.micActive: " + props.micActive)
   }, [props.micActive]);
 
@@ -44,7 +65,7 @@ function UserInput(props) {
       opacity: 1,
       color: ["#eee", "#000"], // array of colors to cycle through
       transition: {
-        duration: 0.25, // duration of one cycle
+        duration: 0.2, // duration of one cycle
         repeat: Infinity, // repeat the cycle indefinitely
         repeatType: "reverse",
       },
@@ -144,18 +165,25 @@ function UserInput(props) {
           height:"40px", 
           paddingLeft:"6px",
           paddingRight:"6px",
-          backgroundd:"yellow", 
-          alignContent:"center", 
-          justifyContent:"space-between"}}>
-        <span 
-          className="material-icons-outlined" 
-          style={{
-            fontSize: "24px",
-            fontWeight: "500", 
-            color: "#333", 
-          }}>
-          task
-        </span>
+          justifyContent:"space-between",
+        }}
+      >
+        <div style={{background:"none", display: "flex", alignItems:"flex-start", width:"50px", background:"none"}}>
+          <div>
+            <span 
+              className="material-icons-outlined" 
+              style={{
+                fontSize: "24px",
+                fontWeight: "500", 
+                color: numTodos > 0 ? "#333" : "#ddd", 
+              }}>
+              task
+            </span>
+          </div>
+          <div style={{background:"none", marginTop:"3px", marginLeft:"2px"}}>
+            {numTodos > 0 ? numTodos : ""}
+          </div>
+        </div>
         {isManualMode ? (
           <span 
             className="material-icons" 
@@ -179,15 +207,24 @@ function UserInput(props) {
             chat
           </span>
         )}
-        <span 
-          className="material-icons-outlined" 
-          style={{
-            fontSize: "24px",
-            fontWeight: "500", 
-            color: "#333", 
-          }}>
-          notifications
-        </span>
+        <div style={{background:"none", display: "flex", alignItems:"flex-start", width:"50px", background:"none"}}>
+          <div style={{flex:1}}></div>
+          <div style={{background:"none", marginTop:"3px", marginRight:"2px"}}>
+          {numTasks > 0 ? numTasks : ""}  
+          </div>
+          <div>
+            <span 
+              className="material-icons-outlined" 
+              style={{
+                fontSize: "24px",
+                fontWeight: "500", 
+                color: numTasks > 0 ? "#333" : "#ddd", 
+              }}>
+              schedule
+            </span>
+          </div>
+        </div>
+
       </div>
     </div>
   );

@@ -28,7 +28,7 @@ class ToDoItem {
 
     setTimeout(() => {
       this.callback(this.spec)
-    }, Math.random() * 5000 + 1000);
+    }, Math.random() * 1000 + 1000);
   }
 }
 
@@ -42,7 +42,7 @@ class InfoItem {
 
     setTimeout(() => {
       this.callback(this.spec)
-    }, Math.random() * 5000 + 1000);
+    }, Math.random() * 1000 + 1000);
   }
 }
 
@@ -56,7 +56,7 @@ class TaskItem {
 
     setTimeout(() => {
       this.callback(this.spec)
-    }, Math.random() * 500 + 100);
+    }, Math.random() * 1000 + 1000);
   }
 }
 
@@ -79,7 +79,6 @@ class SupplementFetcher {
 const supplementFetcher = new SupplementFetcher(); 
 
 
-
 function Assistant(props) {
   const [llmInference, setLlmInference] = useState(null);
   const [llmIsProcessing, setLlmIsProcessing] = useState(false);
@@ -94,10 +93,11 @@ function Assistant(props) {
   const [chatPrompts, setChatPrompts] = useState("");
   const [showMicHint, setShowMicHint] = useState(true);
   const [supplementWindowState, setSupplementWindowState] = useState('dormant');
+  const [curSupplement, setCurSupplement] = useState(null);
 
 
   /****************************************
-    Miscellaneous Functions
+    useRefs
   *****************************************/
 
   const chatStateRef = useRef(chatState);
@@ -137,18 +137,42 @@ function Assistant(props) {
     setChatState('dormant');
     setRecognitionIsStarted(false);
     setMicActive(false);
+    toggleSupplementWindow('dormant', null);
+  }
+
+  const resetChat = () => {
+    setChatDialog([]);
+    setChatPrompts("");
+    closeChat()
   }
 
   const manualSend = (text) => {
     sendQuestion(llmInference, text, chatPrompts);
   }
 
-  function insertSupplement(spec) {  
+  function insertSupplement(spec) {
     console.log('insertSupplement: ', spec);
 
     setChatDialog(chatDialog => chatDialog.map(dialog => 
       dialog.id === spec.dialog_id ? {...dialog, supplement: spec} : dialog
     ));
+  }
+
+  function toggleSupplementIsCompleted(id) {
+    setChatDialog(chatDialog => chatDialog.map(dialog => 
+      dialog.id === id ? {...dialog, supplement: {...dialog.supplement, isCompleted: !dialog.isCompleted}} : dialog
+    ));
+  }
+
+  function toggleSupplementWindow(state, spec) {
+    // Hack to set height of supplement window
+    let chatWindow = document.getElementById("chatWindow");
+    let chatWindowHeight = chatWindow.offsetHeight - 60;
+    let supplementWindow = document.getElementById("supplementWindow");
+    supplementWindow.style.height = `${chatWindowHeight}px`;
+    
+    setSupplementWindowState(state);
+    setCurSupplement(spec);
   }
 
   /****************************************
@@ -159,7 +183,6 @@ function Assistant(props) {
   const displayPartialResults = (
     partialResults, 
     complete, 
-    chatPrompts,
   ) => {
     partialMessage += partialResults
     setMessage(partialMessage);
@@ -184,7 +207,7 @@ function Assistant(props) {
 
       // Simulate getting a supplement
       const types  = ["todo", "info", "task"];
-      if (Math.random() > 0.0)  {
+      if (Math.random() > 0.5)  {
         supplementFetcher.fetchSupplement(
           {
             dialog_id: uuid,
@@ -227,7 +250,7 @@ function Assistant(props) {
         setLlmIsProcessing(true);
         llmInference.generateResponse(
           prompt, 
-          (partialResults, complete, chatPrompts) => displayPartialResults(partialResults, complete, chatPrompts)
+          (partialResults, complete) => displayPartialResults(partialResults, complete)
         );
       } catch (error) {
         console.log('Error generating response: ', error);
@@ -312,7 +335,6 @@ function Assistant(props) {
     });
   }, []);
 
-
   useEffect(() => {
     chatPromptsRef.current = chatPrompts;
   }, [chatPrompts]);
@@ -375,15 +397,15 @@ function Assistant(props) {
 
   const vaiantsSupplementWindow = {
     open: {
-      x: 400,
+      x: 380,
       opacity: 1,
       transition: { duration: 0.3, ease: 'circInOut' }
     },
 
     dormant: {
       x: 12,
-      opacity: 1,
-      transition: { duration: 0.3, ease: 'easeOut' }
+      opacity: 0,
+      transition: { duration: 0.2, ease: 'circInOut' }
     }
   }
 
@@ -440,15 +462,26 @@ function Assistant(props) {
           />
         </div>
       </div>
-      <div style={{
-        position:"fixed",
-        top:"104px",
-        right:"10px",
-      }}>
+      <div 
+        onClick={resetChat}
+        style={{
+          position:"fixed",
+          top:"104px",
+          right:"10px",
+          cursor:"pointer",
+        }}
+      >
         <img src={process.env.PUBLIC_URL + '/images/folder.png'} 
         alt="Menu bar" 
         style={{width:'83px', height:'68px',}}
-      />
+        />
+        <div style={{
+          color:"#fff", 
+          fontSize:"12px", 
+          textAlign:"center", 
+          position:"relative",
+          top:"-10px",
+        }}>Reset</div>
       </div>
 
       <div style={{
@@ -487,6 +520,7 @@ function Assistant(props) {
           paddingRight: "8px",
           paddingBottom: "6px", 
           width: "28px", 
+          zIndex: "10",
           borderTopRightRadius: "20px",
           borderBottomRightRadius: "20px",
           boxShadow: "0px 12px 12px rgba(0, 0, 0, 0.5)",
@@ -517,17 +551,133 @@ function Assistant(props) {
           fontWeight:"600",
         }}>?</div>
       </motion.div>
-      
+        
       {/* Chat window */}
       <motion.div 
-        className="chat-window-main"
+        id="chatWindow"
+        style={{
+          position: "relative",
+          display: 'flex', 
+          flexDirection: 'column', 
+          height: '100vh',
+          width: '420px',
+          zIndex: "2",
+          minHeight:"0px", 
+        }}
         animate={chatState}
         initial="dormant"
-        variants={vaiantsChatWindowMain}>
-        
+        variants={vaiantsChatWindowMain}
+      >
+        <div 
+          className="chat-window-main"
+          style={{
+            display:"flex",
+            flexDirection:"column",
+            position: "relative",
+            background: "white",
+            minHeight:"0px", 
+            boxShadow: "0px 0px 12px rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          <div style={{justifyContent:"flex-end", display:"flex", height:"24px", background:"white"}}>
+            <span 
+              onClick={closeChat}
+              className="material-icons" 
+              style={{
+                fontSize: "20px",
+                fontWeight: "500", 
+                color: "#333",
+                cursor:"pointer",
+              }}>
+              close
+            </span>
+          </div>
+          <div 
+            id="chat-dialog"
+            ref={chatDialogDivRef}
+            style={{
+              flex:1, 
+              overflowY:"scroll",
+              minHeight:"0px", 
+            }}
+          >
+          <div style={{
+            position:"absolute", 
+            top:"36px", 
+            left:"0px", 
+            width:"360px", 
+            height:"30px", 
+            background: "linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0))"
+          }}></div>
+          <div style={{
+            position:"absolute", 
+            bottom:"150px", 
+            left:"0px", 
+            width:"360px", 
+            height:"30px", 
+            background: "linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1))"
+          }}></div>
+
+            <div style={{height:"20px"}}></div>
+            {chatDialog.map((dialog, index) => {
+              if (dialog.speaker === "user") {
+                return <DialogPanelUser key={"user_dialog_"+index} message={dialog.message}/>;
+              } else if (dialog.speaker === "assistant") {
+                return <DialogPanelAssistant 
+                          key={dialog.id} 
+                          message={dialog.message} 
+                          supplement={dialog.supplement}
+                          toggleSupplementWindow={toggleSupplementWindow}
+                          toggleSupplementIsCompleted={toggleSupplementIsCompleted}
+                        />;
+              }
+            })}
+            <DialogPanelAssistant 
+              message={message}
+              messageDivRef={messageDivRef}
+              toggleSupplementWindow={toggleSupplementWindow}
+              toggleSupplementIsCompleted={toggleSupplementIsCompleted}
+            />
+          </div>
+          <UserInput 
+            sendQuestion={sendQuestion} 
+            userInput={userInput} 
+            micActive={micActive} 
+            setMicActive={setMicActive}
+            manualSend={manualSend}
+            showMicHint={showMicHint}
+            chatDialog={chatDialog}
+          />
+        </div>
+      </motion.div>
+      
+      {/* Drawer window */}
+      <motion.div 
+        id="supplementWindow"
+        animate={supplementWindowState}
+        initial="dormant"
+        variants={vaiantsSupplementWindow}
+        style={{
+          position: "absolute",
+          zIndex: "1",
+          top: "50px",
+          display: "flex",
+          flexDirection: "column",
+          width: "350px",
+          height: "896px",
+          background: "white",
+          boxShadow: "0px 0px 12px rgba(0, 0, 0, 0.5)",
+          borderRadius: "20px",
+          border: "5px solid #9AA7B8",
+          paddingTop: "12px",
+          paddingBottom: "12px",
+          paddingLeft: "32px",
+          paddingRight: "12px",
+        }}
+      >
         <div style={{justifyContent:"flex-end", display:"flex", height:"24px", background:"white"}}>
           <span 
-            onClick={closeChat}
+            onClick={() => toggleSupplementWindow('dormant', null)}
             className="material-icons" 
             style={{
               fontSize: "20px",
@@ -538,84 +688,77 @@ function Assistant(props) {
             close
           </span>
         </div>
-        <div 
-          id="chat-dialog"
-          ref={chatDialogDivRef}
-          style={{
-            flex:1, 
-            background:"none", 
-            overflowY:"scroll",
-            minHeight:"0px", 
-          }}
-        >
         <div style={{
-          position:"absolute", 
-          top:"36px", 
-          left:"0px", 
-          width:"360px", 
-          height:"30px", 
-          background: "linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0))"
-        }}></div>
-        <div style={{
-          position:"absolute", 
-          bottom:"150px", 
-          left:"0px", 
-          width:"360px", 
-          height:"30px", 
-          background: "linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1))"
-        }}></div>
+          flex:1,
+          background:"white",
+        }}>
+          {curSupplement && (
 
-          <div style={{height:"20px"}}></div>
-          {chatDialog.map((dialog, index) => {
-            if (dialog.speaker === "user") {
-              return <DialogPanelUser key={"user_dialog_"+index} message={dialog.message}/>;
-            } else if (dialog.speaker === "assistant") {
-              return <DialogPanelAssistant 
-                        key={dialog.id} 
-                        message={dialog.message} 
-                        supplement={dialog.supplement}
-                      />;
-            }
-          })}
-          <DialogPanelAssistant 
-            message={message}
-            messageDivRef={messageDivRef}
-          />
+            <div 
+              style={{
+                display: "flex",
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",}}
+            >
+              <div style={{
+                marginRight:"8px",
+                width: "32px",
+                height: "32px",
+                background: curSupplement.color,
+                borderRadius: "50%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}>
+                <span 
+                  className="material-icons-outlined" 
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: "400", 
+                    color: "#fff", 
+                  }}
+                >
+                  {curSupplement.isCompleted ? 'check' : curSupplement.icon}
+                </span>
+              </div>
+              <div style={{
+                flex:"1",
+                fontFamily:"Open Sans", 
+                fontSize:"16px",
+                fontWeight:"400", 
+                color:"#333",
+                textDecoration: curSupplement.isCompleted ? "line-through" : "none",
+              }}>
+                {curSupplement.text}
+              </div>
+            </div>
+          )}
+         
         </div>
-        <UserInput 
-          sendQuestion={sendQuestion} 
-          userInput={userInput} 
-          micActive={micActive} 
-          setMicActive={setMicActive}
-          manualSend={manualSend}
-          showMicHint={showMicHint}
-        />
+        <button 
+          onClick={() => toggleSupplementIsCompleted(curSupplement.dialog_id)}
+        style={{
+          backgroundColor: '#666',
+          border: 'none',
+          color: 'white',
+          padding: '8px 32px',
+          textAlign: 'center',
+          textDecoration: 'none',
+          display: 'inline-block',
+          fontSize: '16px',
+          margin: '4px 2px',
+          cursor: 'pointer',
+          borderRadius: '12px'
+        }}>
+          Done
+        </button>
+
       </motion.div>
+      {/* End drawer window */}
+      
     </div>
   );
 }
 
-export default Assistant; 
-
-
-{/* Supplement window 
-<motion.div 
-className="supplement-window-main"
-animate={supplementWindowState}
-initial="dormant"
-variants={vaiantsSupplementWindow}>
-<div style={{justifyContent:"flex-end", display:"flex", height:"24px", background:"white"}}>
-  <span 
-    onClick={closeChat}
-    className="material-icons" 
-    style={{
-      fontSize: "20px",
-      fontWeight: "500", 
-      color: "#333",
-      cursor:"pointer",
-    }}>
-    close
-  </span>
-</div>
-</motion.div>
-End supplement window */}
+export default Assistant;

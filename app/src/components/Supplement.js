@@ -12,11 +12,12 @@ function Supplement(props) {
       y: 0,
       scale: 1,
       opacity: 1,
-      transition: { duration: 0.3, ease: 'backOut',}
+      //transition: { duration: 0.5, ease: 'backOut',}
+      transition: { duration: 0.4, ease: 'easeInOut', type: 'spring', stiffness: 600, damping: 30 }
     },
     dormant: {
-      x: -10,
-      y: 0,
+      x: 0,
+      y: -20,
       scale: 0,
       opacity: 0,
       //transition: { duration: 3, ease: 'easeInOut', delay: 1, type: 'spring', stiffness: 600, damping: 20 }
@@ -32,46 +33,73 @@ function Supplement(props) {
     >
       
       <div 
-        onClick={() => { alert("Supplement clicked") }}
+        onClick={() => { 
+          props.toggleSupplementWindow('open', props.spec);
+          //props.toggleSupplementIsCompleted(props.spec.dialog_id);
+        }}
         style={{
           display: "flex",
           flexDirection: "row",
-          paddingLeft: "12px",
-          background: props.spec.color,
+          paddingLeft: "8px",
+          paddingRight: "8px",
+          paddingTop: "2px",
+          paddingBottom: "2px",
+          background: "#EAEFF3",
           borderRadius: "12px",
-          height: "36px",
+          height: "32px",
           alignItems: "center",
         }}
       >
-        <div style={{paddingTop:"4px", marginRight:"8px"}}>
+        <div style={{
+          marginRight:"8px",
+          width: "22px",
+          height: "22px",
+          background: props.spec.color,
+          borderRadius: "50%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}>
           <span 
             className="material-icons-outlined" 
             style={{
-              fontSize: "20px",
+              fontSize: "16px",
               fontWeight: "400", 
               color: "#fff", 
-            }}>
-            arrow_forward
+            }}
+          >
+            {props.spec.isCompleted ? 'check' : props.spec.icon}
           </span>
         </div>
+        
         <div style={{
           flex:"1",
           fontFamily:"Open Sans", 
-          fontSize:"14px",
+          fontSize:"12px",
           fontWeight:"400", 
-          color:"#fff",
+          color:"#333",
+          textDecoration: props.spec.isCompleted ? "line-through" : "none",
         }}>
           {props.spec.text}
         </div>
-        <div style={{paddingTop:"4px", marginRight:"8px"}}>
+        
+        <div style={{
+          marginLeft:"8px",
+          width: "32px",
+          height: "32px",
+          borderRadius: "50%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}>
           <span 
             className="material-icons-outlined" 
             style={{
               fontSize: "20px",
               fontWeight: "400", 
-              color: "#fff", 
+              color: "#333", 
             }}>
-            {props.spec.icon}
+            arrow_forward
           </span>
         </div>
       </div>

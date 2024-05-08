@@ -47,7 +47,11 @@ function DialogPanelAssistant(props) {
         <div style={{fontFamily:"Source Sans Pro", flex:1, color:"#444", paddingRight:"20px"}}>
           <div ref={props.messageDivRef}>{props.message ? props.message : null}</div>
             {/* Supplements */}
-              {props.supplement != null ? <Supplement spec={props.supplement} isActive={true}/> : null}
+              {props.supplement != null ? <Supplement 
+                                            spec={props.supplement} 
+                                            isActive={true} 
+                                            toggleSupplementWindow={props.toggleSupplementWindow}
+                                            toggleSupplementIsCompleted={props.toggleSupplementIsCompleted}/> : null}
             {/* End Supplements */}
         </div>
 
