@@ -89,27 +89,28 @@ function UserInput(props) {
     >
       <div
         style={{
-          height:"80px", 
+          minHeight:"32px", 
           background:"white", 
           border: "1px solid #AEBBCC", 
           padding:"8px",
           marginBottom:"12px",
-          borderRadius:"4px",
+          borderRadius:"12px",
       }}>
         {/* Hint */}
         <div style={{ 
           position:"absolute", 
           width:"340px", 
-          height:"80px", 
-          background:"none",
+          minHeight:"32px",
+          backgroundColor:"none",
           display: !props.showMicHint || isManualMode ? "none" : "flex",
           justifyContent:"center",
           alignItems:"center",
+          paddingTop:"2px",
         }}> 
-          <img src={process.env.PUBLIC_URL + '/svg/coachtip_hand_mic.svg'} 
+          {/*<img src={process.env.PUBLIC_URL + '/svg/coachtip_hand_mic.svg'} 
             alt="open hand = mic" 
             style={{width:'auto', height:'auto',}}
-          />
+          />*/}
         </div>
         
         {/* Text */}
@@ -122,6 +123,7 @@ function UserInput(props) {
             borderRadius:"50%", 
             background:"none", 
             marginRight:"8px",
+            marginTop:"7px",
             display: props.micActive ? "block" : "block",
           }}
         >
@@ -135,10 +137,14 @@ function UserInput(props) {
             }}>
             mic
           </motion.span> 
-        </div>{(props.userInput && props.userInput.length > 0) ? 
+        </div>
+        <div style={{paddingTop:"7px",}}>
+          {(props.userInput && props.userInput.length > 0) ? 
             formatTranscription(props.userInput) 
             : 
-            "" }
+            "" 
+          }
+        </div>
         <div 
         ref={divRef}
         onKeyDown={(e) => {
@@ -151,13 +157,12 @@ function UserInput(props) {
         style={{
           position:"absolute",
           width:"340px", 
-          height:"80px",  
+          minHeight:"32px",  
           background:"white",
           display: isManualMode ? "block" : "none",
         }}></div>
       </div>
 
-      
       <div 
         style={{
           display: "flex",

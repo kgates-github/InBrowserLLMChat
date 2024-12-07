@@ -551,6 +551,50 @@ function Assistant(props) {
           fontWeight:"600",
         }}>?</div>
       </motion.div>
+
+      <motion.div style={{
+        position:"absolute", 
+        top: "644px", 
+        left:"400px",
+        width:"44px",
+        height:"44px",
+        backgroundColor:"#fff",
+        borderRadius:"50%",
+        border:"4px solid #99A7B8",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "row",
+      }}>
+        <div>
+          <span 
+            className="material-icons-outlined" 
+            style={{
+              fontSize: "26px",
+              color: "#888",
+              cursor:"pointer",
+              paddingBottom:"2px"
+              //transform: "rotate(20deg)",
+            }}>
+            thumb_up
+          </span>
+        </div>
+        <div style={{
+          position:"absolute", 
+          bottom:14, 
+          right:-60,
+          fontSize:"12px", 
+          paddingLeft:8, 
+          paddingRight:8,
+          paddingTop:1,
+          paddingBottom:1,
+          borderRadius:"6px",
+          backgroundColor:"#333",
+          color:"#fff"
+        }}>
+          Open?
+        </div>
+      </motion.div>
         
       {/* Chat window */}
       <motion.div 
@@ -597,7 +641,8 @@ function Assistant(props) {
             ref={chatDialogDivRef}
             style={{
               flex:1, 
-              overflowY:"scroll",
+              overflowY:"auto",
+              overflowX: "visible",
               minHeight:"0px", 
             }}
           >
@@ -611,11 +656,11 @@ function Assistant(props) {
           }}></div>
           <div style={{
             position:"absolute", 
-            bottom:"150px", 
+            bottom:"106px", 
             left:"0px", 
             width:"360px", 
             height:"30px", 
-            background: "linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1))"
+            background: "linear-gradient(to bottom, rgba(0, 255, 255, 0), rgba(255, 255, 255, 1))"
           }}></div>
 
             <div style={{height:"20px"}}></div>
