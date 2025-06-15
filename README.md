@@ -1,4 +1,3 @@
-# Agentic I
 Using a compact version of Google's Gemini (Gemma2b) running in-browser, this prototype explores intricacies of using hand gestures and voice commands to interact with a low-latency LLM.
 
 NOTE: This app requires a current version of Google Chrome browser to run.
