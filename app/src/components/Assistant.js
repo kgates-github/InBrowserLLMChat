@@ -4,6 +4,7 @@ import DialogPanelAssistant from './DialogPanelAssistant';
 import DialogPanelUser from './DialogPanelUser';
 import CoachTip from './CoachTip';
 import UserInput from './UserInput';
+import CloseTooltip from './CloseTooltip';
 import { motion } from "framer-motion"
 import '../App.css';
 import '../Assistant.css';
@@ -314,12 +315,6 @@ function Assistant(props) {
     }
   }
 
-  const handleThumbUp = (e, setChatIsOpen) => {
-    console.log('handleThumbUp');
-    setChatIsOpen(false)
-  }
-
-
   /****************************************
     useEffects
   *****************************************/
@@ -375,6 +370,8 @@ function Assistant(props) {
       setShowCoachTip('none')
     }
   }, [chatState, isLoaded]);
+
+ 
   
 
   /****************************************
@@ -382,18 +379,17 @@ function Assistant(props) {
   *****************************************/
 
   const vaiantsChatWindowMain = {
-    open: {
-      x: 12,
-      opacity: 1,
-      transition: { duration: 0.3, ease: 'circInOut' }
-    },
-
-    dormant: {
-      x: -340,
-      opacity: 0,
-      transition: { duration: 0.3, ease: 'easeOut' }
-    }
+  open: {
+    x: 0,
+    opacity: 1,
+    transition: { duration: 0.3, ease: 'circInOut' }
+  },
+  dormant: {
+    x: -340,
+    opacity: 0,
+    transition: { duration: 0.3, ease: 'easeOut' }
   }
+}
 
   const vaiantsSupplementWindow = {
     open: {
@@ -409,90 +405,125 @@ function Assistant(props) {
     }
   }
 
-  const vaiantsAssistantAvatar = {
-    ready: {
-      x: -1,
-      y: 70,
+  /*
+  ready: {
+      x: -20,
+      y: 20,
       opacity: 1,
       rotate: 0,
-      transition: { duration: 0.2, ease: 'easeInOut', delay: 0, type: 'spring', stiffness: 600, damping: 20 }
+      width: 120,
+      height: 120,
+      transition: { duration: 0.3, ease: 'easeInOut', delay: 0, }
+    },
+  */
+
+  const vaiantsAssistantAvatar = {
+    ready: {
+      x: -20,
+      y: 20,
+      opacity: 1,
+      width: 120,
+      height: 120,
+      transition: { duration: 0.3, ease: 'easeInOut', delay: 0, /*type: 'spring', stiffness: 600, damping: 20*/ }
     },
     dormant: {
-      x: -36,
-      y: 70,
+      x: -40,
+      y: 40,
       opacity: 0,
       rotate: 0,
+      width: 40,
+      height: 40,
       transition: { duration: 0.2, ease: 'backOut' }
     }
+  }
+
+  const vaiantsSpeechBubble = {
+    ready: {
+      x: 0,
+      y: 0,
+      opacity: [0, 1, 0],
+      width: 120,
+      height: 120,
+      scale: [1, 2.2, 1],
+      transition: {
+        duration: 1.0, // duration of one cycle
+        repeat: Infinity, // repeat the cycle indefinitely
+        repeatType: "mirror",
+      },
+    },
+    dormant: {
+      x: -40,
+      y: 40,
+      opacity: 0,
+      rotate: 0,
+      width: 40,
+      height: 40,
+      //transition: { duration: 0.2, ease: 'backOut' }
+    }
+  }
+
+  const variantsMic = {
+    on: {
+      opacity: 1,
+      color: ["#eee", "#333"], // array of colors to cycle through
+      transition: {
+        duration: 0.3, // duration of one cycle
+        repeat: Infinity, // repeat the cycle indefinitely
+        repeatType: "reverse",
+      },
+    },
+    off: {
+      opacity: 1,
+      color: "#ccc", // static color when not blinking
+    },
   }
  
   return (
     <div className="deskTop" style={{
-      background:"#545454",
+      background:"#E7EAEB",
       height:"100vh", 
       display:"flex",
       flexDirection:"column",
     }}>
       <CoachTip 
-        image={"icon_palm_open"} 
-        text1={''}
-        text2={'Raise your hand and say hello!'}
+        icon={"back_hand"}
+        text={'Raise your hand and say hello!'}
         showCoachTip={showCoachTip === "intro" ? true : false}
       />
 
-      {/* Fake desktop */}
+      {/* Fake browser window */}
+
       <div style={{
-        width:"100%",
-        height:"38px",
-        background:"#454645",
+        background:"#fff", 
+        height:52, 
         display:"flex",
         flexDirection:"row",
+        zIndex:3,
+        borderBottom:"1px solid #ddd"
       }}>
-        <div>
-          <img src={process.env.PUBLIC_URL + '/images/menu_bar_1.png'} 
-            alt="Menu bar" 
-            style={{width:'380px', height:'26px', marginTop:"5px", marginLeft:"10px"}}
-          />
-        </div>
+        <img src={process.env.PUBLIC_URL + '/images/browser_left.png'} /> 
         <div style={{flex:1}}></div>
-        <div>
-          <img src={process.env.PUBLIC_URL + '/images/menu_bar_2.png'} 
-            alt="Menu bar" 
-            style={{width:'558px', height:'23px', marginTop:"6px", marginRight:"4px"}}
-          />
-        </div>
+        <img src={process.env.PUBLIC_URL + '/images/browser_middle.png'} /> 
+        <div style={{flex:1}}></div>
+        <img src={process.env.PUBLIC_URL + '/images/browser_right.png'} /> 
       </div>
+
       <div 
         onClick={resetChat}
         style={{
           position:"fixed",
-          top:"104px",
-          right:"10px",
+          bottom:"10px",
+          right:"20px",
           cursor:"pointer",
         }}
       >
-        <img src={process.env.PUBLIC_URL + '/images/folder.png'} 
-        alt="Menu bar" 
-        style={{width:'83px', height:'68px',}}
-        />
         <div style={{
-          color:"#fff", 
+          color:"#777", 
           fontSize:"12px", 
           textAlign:"center", 
           position:"relative",
           top:"-10px",
         }}>Reset</div>
-      </div>
-
-      <div style={{
-        position:"fixed",
-        top:"194px",
-        right:"10px",
-      }}>
-        <img src={process.env.PUBLIC_URL + '/images/folder.png'} 
-        alt="Menu bar" 
-        style={{width:'83px', height:'68px',}}
-      />
       </div>
 
       {/* LLM Loader */}
@@ -512,106 +543,241 @@ function Assistant(props) {
       </div>
 
       {/* Avatar */}
+
+      {/*<motion.div 
+        style={{
+          position: "absolute",
+          bottom:"0px",
+          background: "white", 
+          zIndex: "10",
+          borderRadius: "50%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "120px",
+          height: "120px",
+          // boxShadow: "0px 12px 12px rgba(0, 0, 0, 0.5)",
+        }}
+        animate={chatState}
+        initial="dormant"
+        variants={vaiantsSpeechBubble}> 
+      </motion.div>*/}
+
       <motion.div 
         style={{
           position: "absolute",
+          bottom:"0px",
           background: "white", 
-          paddingTop: "4px",
-          paddingRight: "8px",
-          paddingBottom: "6px", 
-          width: "28px", 
           zIndex: "10",
-          borderTopRightRadius: "20px",
-          borderBottomRightRadius: "20px",
-          boxShadow: "0px 12px 12px rgba(0, 0, 0, 0.5)",
+          borderRadius: "50%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "40px",
+          height: "40px",
+          // boxShadow: "0px 12px 12px rgba(0, 0, 0, 0.5)",
         }}
         animate={chatState}
         initial="dormant"
         variants={vaiantsAssistantAvatar}>
-        <div style={{justifyContent:"flex-end", alignContent:"center", display:"flex",}}>
-          <span 
-            onClick={closeChat}
-            className="material-icons-outlined" 
+          <motion.span 
+            className="material-icons-outlined"  
+            animate="on"
+            initial="off"
+            variants={variantsMic}
             style={{
               fontSize: "28px",
               fontWeight: "500", 
-              color: "#333",
+              color: "#666",
               cursor:"pointer",
-              transform: "rotate(20deg)",
             }}>
-            smart_toy
-          </span>
-        </div>
-        <div style={{
-          position:"absolute", 
-          top:"-8px", 
-          left:"40px", 
-          color:"#fff", 
-          fontSize:"20px",
-          fontWeight:"600",
-        }}>?</div>
+            mic
+          </motion.span> 
       </motion.div>
+      
 
-      <motion.div style={{
-        position:"absolute", 
-        top: "644px", 
-        left:"400px",
-        width:"44px",
-        height:"44px",
-        backgroundColor:"#fff",
-        borderRadius:"50%",
-        border:"4px solid #99A7B8",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "row",
-      }}>
-        <div>
-          <span 
-            className="material-icons-outlined" 
-            style={{
-              fontSize: "26px",
-              color: "#888",
-              cursor:"pointer",
-              paddingBottom:"2px"
-              //transform: "rotate(20deg)",
-            }}>
-            thumb_up
-          </span>
-        </div>
-        <div style={{
-          position:"absolute", 
-          bottom:14, 
-          right:-60,
-          fontSize:"12px", 
-          paddingLeft:8, 
-          paddingRight:8,
-          paddingTop:1,
-          paddingBottom:1,
-          borderRadius:"6px",
-          backgroundColor:"#333",
-          color:"#fff"
-        }}>
-          Open?
-        </div>
-      </motion.div>
-        
       {/* Chat window */}
       <motion.div 
         id="chatWindow"
         style={{
           position: "relative",
           display: 'flex', 
-          flexDirection: 'column', 
+          flexDirection: 'row', 
           height: '100vh',
-          width: '420px',
+          width: '460px',
           zIndex: "2",
           minHeight:"0px", 
+          boxShadow: "0px 8px 12px rgba(0, 0, 0, 0.2)",
         }}
         animate={chatState}
         initial="dormant"
         variants={vaiantsChatWindowMain}
       >
+        <CloseTooltip 
+          icon={"thumb_up"}
+          chatState={chatState}
+          setChatState={setChatState}
+          subscribe={props.subscribe}
+          text={'Close?'}
+          // showCoachTip={showCoachTip === "intro" ? true : false}
+        />
+        {/* LEFT NAV CHAT WINDOW */}
+        <div style={{
+          width:60, 
+          background:"#F4F4F4",
+          display:"flex",
+          flexDirection:"column",
+          alignItems:"center",
+          gap:26,
+          paddingTop:60,
+          paddingBottom: 40
+        }}>
+          <div style={{
+              background:"#fff", 
+              width:38, height:38,
+              borderRadius:"6px",
+              display:"flex",
+              alignItems:"center",
+              justifyContent:"center"
+          }}>
+            <span 
+              className="material-icons-outlined" 
+              style={{
+                fontSize: "24px",
+                fontWeight: "500", 
+                color: "#888888", 
+              }}>
+              chat
+            </span>
+          </div>
+          <div>
+            <span 
+              className="material-icons-outlined" 
+              style={{
+                fontSize: "24px",
+                fontWeight: "500", 
+                color: "#888888", 
+              }}>
+              info
+            </span>
+          </div>
+          <div>
+            <span 
+              className="material-icons-outlined" 
+              style={{
+                fontSize: "24px",
+                fontWeight: "500", 
+                color: "#888888", 
+              }}>
+              task
+            </span>
+          </div>
+          <div>
+            <span 
+              className="material-icons-outlined" 
+              style={{
+                fontSize: "24px",
+                fontWeight: "500", 
+                color: "#888888", 
+              }}>
+              search
+            </span>
+          </div>
+          <div style={{flex:1}}/>
+           <div>
+            <span 
+              className="material-icons-outlined" 
+              style={{
+                fontSize: "24px",
+                fontWeight: "500", 
+                color: "#888888", 
+              }}>
+              settings
+            </span>
+          </div>
+           <div>
+            <span 
+              className="material-icons-outlined" 
+              style={{
+                fontSize: "24px",
+                fontWeight: "500", 
+                color: "#888888", 
+              }}>
+              account_circle
+            </span>
+          </div>
+          {/*
+          <div 
+            style={{
+              display: "flex",
+              cursor:"pointer",
+              height:"40px", 
+              paddingLeft:"6px",
+              paddingRight:"6px",
+              justifyContent:"space-between",
+            }}
+          >
+            <div style={{background:"none", display: "flex", alignItems:"flex-start", width:"50px", background:"none"}}>
+              <div>
+                <span 
+                  className="material-icons-outlined" 
+                  style={{
+                    fontSize: "24px",
+                    fontWeight: "500", 
+                    color: numTodos > 0 ? "#333" : "#ddd", 
+                  }}>
+                  task
+                </span>
+              </div>
+              <div style={{background:"none", marginTop:"3px", marginLeft:"2px"}}>
+                {numTodos > 0 ? numTodos : ""}
+              </div>
+            </div>
+            {isManualMode ? (
+              <span 
+                className="material-icons" 
+                onClick={() => manualSend()}
+                style={{
+                  fontSize: "24px",
+                  fontWeight: "500", 
+                  color: "#333", 
+                  cursor:"pointer",
+                }}>
+                send
+              </span>
+            ) : (
+              <span
+                className="material-icons-outlined" 
+                style={{
+                  fontSize: "24px",
+                  fontWeight: "500", 
+                  color: "#333", 
+                }}>
+                chat
+              </span>
+            )}
+            <div style={{background:"none", display: "flex", alignItems:"flex-start", width:"50px", background:"none"}}>
+              <div style={{flex:1}}></div>
+              <div style={{background:"none", marginTop:"3px", marginRight:"2px"}}>
+              {numTasks > 0 ? numTasks : ""}  
+              </div>
+              <div>
+                <span 
+                  className="material-icons-outlined" 
+                  style={{
+                    fontSize: "24px",
+                    fontWeight: "500", 
+                    color: numTasks > 0 ? "#333" : "#ddd", 
+                  }}>
+                  schedule
+                </span>
+              </div>
+            </div>
+
+          </div>
+          */}
+
+        </div>
         <div 
           className="chat-window-main"
           style={{
@@ -620,18 +786,19 @@ function Assistant(props) {
             position: "relative",
             background: "white",
             minHeight:"0px", 
-            boxShadow: "0px 0px 12px rgba(0, 0, 0, 0.5)",
+            //boxShadow: "8px 0px 12px rgba(0, 0, 0, 0.2)",
           }}
         >
-          <div style={{justifyContent:"flex-end", display:"flex", height:"24px", background:"white"}}>
+          <div style={{justifyContent:"flex-end", display:"flex", height:"34px", background:"white"}}>
             <span 
               onClick={closeChat}
               className="material-icons" 
               style={{
                 fontSize: "20px",
                 fontWeight: "500", 
-                color: "#333",
+                color: "#999",
                 cursor:"pointer",
+                marginTop:8,
               }}>
               close
             </span>
@@ -656,11 +823,11 @@ function Assistant(props) {
           }}></div>
           <div style={{
             position:"absolute", 
-            bottom:"106px", 
+            bottom:"82px", 
             left:"0px", 
             width:"360px", 
             height:"30px", 
-            background: "linear-gradient(to bottom, rgba(0, 255, 255, 0), rgba(255, 255, 255, 1))"
+            background: "linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1))"
           }}></div>
 
             <div style={{height:"20px"}}></div>
@@ -705,17 +872,17 @@ function Assistant(props) {
         style={{
           position: "absolute",
           zIndex: "1",
-          top: "50px",
+          top: "150px",
           display: "flex",
           flexDirection: "column",
           width: "350px",
           height: "896px",
-          background: "white",
+          //background: "red",
           boxShadow: "0px 0px 12px rgba(0, 0, 0, 0.5)",
-          borderRadius: "20px",
-          border: "5px solid #9AA7B8",
-          paddingTop: "12px",
-          paddingBottom: "12px",
+          borderRadius: "4px",
+          //border: "5px solid #9AA7B8",
+          //paddingTop: "12px",
+          //paddingBottom: "12px",
           paddingLeft: "32px",
           paddingRight: "12px",
         }}
@@ -794,7 +961,7 @@ function Assistant(props) {
           fontSize: '16px',
           margin: '4px 2px',
           cursor: 'pointer',
-          borderRadius: '12px'
+          borderRadius: '4px'
         }}>
           Done
         </button>

@@ -142,21 +142,34 @@ function GestureCapturer(props) {
           Loading...
         </div>
       </div>
-      <div className="outerContainer" style={{ display: introTwoDisplay, position: "absolute", zIndex:10 }}>
-        <div id="innerContainer">
-          <div className="annotations"
-            style={{
-              width:"450px", 
-              height:"100px", 
-              textAlign:"center",
-              lineHeight:"1.2em",
-            }}>
-            This prototype explores how users might interact with an AI assistant using voice and gestures. It needs access to your webcam and mic.
+      <div className="outerContainer" style={{ 
+        display: introTwoDisplay, 
+        position: "absolute", zIndex:10,
+      }}>
+        <div id="innerContainer" style={{}}>
+          <div style={{
+            background:"white", 
+            padding:"32px", 
+            border:"1px solid #ddd", 
+            borderRadius:"4px",
+            marginBottom:"50px",
+            boxShadow: "0px 8px 12px rgba(0, 0, 0, 0.2)"
+          }}>
+            <div className="annotations"
+              style={{
+                width:"400px", 
+                marginBottom:"10px",
+                //height:"50px", 
+                //textAlign:"center",
+                lineHeight:"1.2em",
+              }}>
+              This prototype uses voice and gesture recognition and requires access to your webcam and mic.
+            </div>
+            <div ref={enableWebcamButtonRef}  id="webcamButton">
+              <span className="">Enable Webcam</span>
+            </div> 
+            
           </div>
-          <div ref={enableWebcamButtonRef}  id="webcamButton">
-            <span className="">Enable Webcam</span>
-          </div> 
-          <div style={{height:"100px"}}></div>
         </div>
       </div>
       <div className="outerContainer" style={{ display: introThreeDisplay, position: "absolute", zIndex:10 }}>

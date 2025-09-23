@@ -45,7 +45,7 @@ function App() {
         <div className="header" style={{position:"fixed", top:0, left:0}}>
           <div style={{flex:1}}></div>
           <div className="title">
-            <div className="header-06" style={{color:"white"}}>Agentic I</div>
+            <div className="header-06" style={{color:"white"}}></div>
           </div>
           <div style={{flex:1}}></div>
         </div>

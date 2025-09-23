@@ -40,21 +40,22 @@ function Supplement(props) {
           style={{
             display: "flex",
             flexDirection: "row",
-            paddingLeft: "8px",
-            paddingRight: "8px",
-            paddingTop: "2px",
-            paddingBottom: "2px",
-            background: "#EAEFF3",
+            paddingLeft: "12px",
+            paddingRight: "12px",
+            paddingTop: "0px",
+            paddingBottom: "0px",
+            background: "#333", 
             borderRadius: "12px",
-            height: "32px",
+            height: "48px",
             alignItems: "center",
+            marginRight:32,
           }}
         >
           <div style={{
             marginRight:"8px",
             width: "22px",
             height: "22px",
-            background: props.spec.color,
+            background: "#333", //props.spec.color,
             borderRadius: "50%",
             display: "flex",
             justifyContent: "center",
@@ -63,7 +64,7 @@ function Supplement(props) {
             <span 
               className="material-icons-outlined" 
               style={{
-                fontSize: "16px",
+                fontSize: "18px",
                 fontWeight: "400", 
                 color: "#fff", 
               }}
@@ -75,9 +76,9 @@ function Supplement(props) {
           <div style={{
             flex:"1",
             fontFamily:"Open Sans", 
-            fontSize:"12px",
+            fontSize:"14px",
             fontWeight:"400", 
-            color:"#333",
+            color:"#fff",
             textDecoration: props.spec.isCompleted ? "line-through" : "none",
           }}>
             {props.spec.text}
@@ -97,7 +98,7 @@ function Supplement(props) {
               style={{
                 fontSize: "20px",
                 fontWeight: "400", 
-                color: "#333", 
+                color: "#fff", 
               }}>
               arrow_forward
             </span>

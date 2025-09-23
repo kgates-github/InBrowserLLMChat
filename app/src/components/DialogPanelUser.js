@@ -14,8 +14,9 @@ function DialogPanelUser(props) {
         display:"flex",
         flexDirection:"row",
         marginBottom:"0px",
+        background:"#ccc",
       }}>
-        <div style={{width:"38px",}}>
+        {/*<div style={{width:"38px",}}>
           <span 
             className="material-icons" 
             style={{
@@ -33,13 +34,16 @@ function DialogPanelUser(props) {
           paddingTop:"2px",
         }}>
           You
-        </div>
+        </div>*/}
       </div>
       <div style={{
         display:"flex",
         flexDirection:"row",
+        border:"1px solid #e3e3e3",
+        padding:16,
+        borderRadius:12,
+        marginLeft:32,
       }}>
-        <div style={{width:"38px"}}></div>
         <div style={{fontFamily:"Source Sans Pro", flex:1, color:"#444", paddingRight:"20px"}}>
           {props.message ? props.message : null} 
         </div>

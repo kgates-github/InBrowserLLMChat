@@ -93,7 +93,7 @@ function UserInput(props) {
           background:"white", 
           border: "1px solid #AEBBCC", 
           padding:"8px",
-          marginBottom:"12px",
+          marginBottom:"32px",
           borderRadius:"12px",
       }}>
         {/* Hint */}
@@ -123,7 +123,8 @@ function UserInput(props) {
             borderRadius:"50%", 
             background:"none", 
             marginRight:"8px",
-            marginTop:"7px",
+            marginLeft:"4px",
+            marginTop:"6px",
             display: props.micActive ? "block" : "block",
           }}
         >
@@ -163,74 +164,7 @@ function UserInput(props) {
         }}></div>
       </div>
 
-      <div 
-        style={{
-          display: "flex",
-          cursor:"pointer",
-          height:"40px", 
-          paddingLeft:"6px",
-          paddingRight:"6px",
-          justifyContent:"space-between",
-        }}
-      >
-        <div style={{background:"none", display: "flex", alignItems:"flex-start", width:"50px", background:"none"}}>
-          <div>
-            <span 
-              className="material-icons-outlined" 
-              style={{
-                fontSize: "24px",
-                fontWeight: "500", 
-                color: numTodos > 0 ? "#333" : "#ddd", 
-              }}>
-              task
-            </span>
-          </div>
-          <div style={{background:"none", marginTop:"3px", marginLeft:"2px"}}>
-            {numTodos > 0 ? numTodos : ""}
-          </div>
-        </div>
-        {isManualMode ? (
-          <span 
-            className="material-icons" 
-            onClick={() => manualSend()}
-            style={{
-              fontSize: "24px",
-              fontWeight: "500", 
-              color: "#333", 
-              cursor:"pointer",
-            }}>
-            send
-          </span>
-        ) : (
-          <span
-            className="material-icons-outlined" 
-            style={{
-              fontSize: "24px",
-              fontWeight: "500", 
-              color: "#333", 
-            }}>
-            chat
-          </span>
-        )}
-        <div style={{background:"none", display: "flex", alignItems:"flex-start", width:"50px", background:"none"}}>
-          <div style={{flex:1}}></div>
-          <div style={{background:"none", marginTop:"3px", marginRight:"2px"}}>
-          {numTasks > 0 ? numTasks : ""}  
-          </div>
-          <div>
-            <span 
-              className="material-icons-outlined" 
-              style={{
-                fontSize: "24px",
-                fontWeight: "500", 
-                color: numTasks > 0 ? "#333" : "#ddd", 
-              }}>
-              schedule
-            </span>
-          </div>
-        </div>
-
-      </div>
+      
     </div>
   );
 }
