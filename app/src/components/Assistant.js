@@ -208,7 +208,7 @@ function Assistant(props) {
 
       // Simulate getting a supplement
       const types  = ["todo", "info", "task"];
-      if (Math.random() > 0.5)  {
+      /*if (Math.random() > 0.5)  {
         supplementFetcher.fetchSupplement(
           {
             dialog_id: uuid,
@@ -218,7 +218,7 @@ function Assistant(props) {
           },
           insertSupplement
         );
-      }
+      }*/
 
       const prompt = `${chatPromptsRef.current}
       ${partialMessage}<end_of_turn>`
@@ -282,11 +282,14 @@ function Assistant(props) {
   *****************************************/
   
   recognition.onresult = (e) => {
+   
     if (chatState === 'ready') {
       setChatState('open');
     }
     const transcript = e.results[0][0].transcript;
-    setUserInput(transcript.charAt(0).toUpperCase() + transcript.slice(1));
+    if (transcript != 'open') {
+      setUserInput(transcript.charAt(0).toUpperCase() + transcript.slice(1));
+    }
   };
 
 
@@ -325,6 +328,7 @@ function Assistant(props) {
 
     getLlmInference().then(result => {
       setLlmInference(result);
+      setShowCoachTip("intro")
     }).catch(error => {
       console.log(error)
     });
@@ -488,7 +492,7 @@ function Assistant(props) {
       <CoachTip 
         icon={"back_hand"}
         text={'Raise your hand and say hello!'}
-        showCoachTip={showCoachTip === "intro" ? true : false}
+        showCoachTip={showCoachTip}
       />
 
       {/* Fake browser window */}
@@ -805,6 +809,7 @@ function Assistant(props) {
           </div>
           <div 
             id="chat-dialog"
+            class="custom-scroll"
             ref={chatDialogDivRef}
             style={{
               flex:1, 

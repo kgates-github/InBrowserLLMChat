@@ -7,6 +7,13 @@ function CoachTip(props) {
   const log = useContext(LogContext);
 
   const variants = {
+    intro: {
+      opacity: 1,
+      scale: 1,
+      y: -20,
+      x: 0,
+      transition: { duration: 0.5, ease: 'easeInOut', delay: 0.5, type: 'spring', stiffness: 100, damping: 5 }
+    },
     open: {
       opacity: 1,
       scale: 1,
@@ -26,7 +33,7 @@ function CoachTip(props) {
   return (
     
     <motion.div 
-    animate={props.showCoachTip ? "open" : "closed"}
+    animate={props.showCoachTip}
     initial="closed"
     variants={variants}
     style={{

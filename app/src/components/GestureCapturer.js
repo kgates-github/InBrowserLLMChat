@@ -138,7 +138,7 @@ function GestureCapturer(props) {
     <>
     
       <div className="outerContainer" style={{ display: introOneDisplay, position: "absolute", zIndex:10 }}>
-        <div id="innerContainer">
+        <div id="innerContainer" style={{color:"white"}}>
           Loading...
         </div>
       </div>
@@ -163,10 +163,10 @@ function GestureCapturer(props) {
                 //textAlign:"center",
                 lineHeight:"1.2em",
               }}>
-              This prototype uses voice and gesture recognition and requires access to your webcam and mic.
+              This prototype uses voice and gesture recognition which require access to your webcam and mic.
             </div>
             <div ref={enableWebcamButtonRef}  id="webcamButton">
-              <span className="">Enable Webcam</span>
+              <span className="">Allow</span>
             </div> 
             
           </div>
@@ -174,7 +174,7 @@ function GestureCapturer(props) {
       </div>
       <div className="outerContainer" style={{ display: introThreeDisplay, position: "absolute", zIndex:10 }}>
         <div id="innerContainer">
-          Starting camera...
+          <span style={{color:"white"}}>Starting camera...</span>
         </div>
       </div>
       {/*

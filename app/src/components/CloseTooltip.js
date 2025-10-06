@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { motion } from "framer-motion"
 import { LogContext } from './LogContext';
 
-const highlightColor = '#f4f4f4'
+const highlightColor = '#bceca3ff'
 
 function CloseTooltip(props) {
   const [tipState, setTipState] = useState('closed');
@@ -15,7 +15,7 @@ function CloseTooltip(props) {
       scale: 1,
       y: 0,
       x: 0,
-      transition: { duration: 0.6, ease: 'easeInOut', delay: 0.3, type: 'spring', stiffness: 400, damping: 20 }
+      transition: { duration: 0.6, ease: 'easeInOut', delay: 2.3, type: 'spring', stiffness: 400, damping: 20 }
     },
     closed: {
       opacity: 0,
@@ -63,7 +63,7 @@ function CloseTooltip(props) {
     style={{
       position:"absolute",
       top: "8px",
-      left: "458px",
+      left: "452px",
       display: "flex",
       flexDirection: "row",
       justifyContent: "center",
@@ -142,13 +142,13 @@ function CloseTooltip(props) {
           position: "absolute",
           left: 0,
           top: 0,
-          width: "40%",
+          width: "0%",
           height: "100%",
           background: highlightColor,
           zIndex: 1,
           pointerEvents: "none"
         }} />
-        <span style={{zIndex: 2, whiteSpace: 'nowrap'}}>{props.text}</span>
+        {/*<span style={{zIndex: 2, whiteSpace: 'nowrap'}}>{props.text}</span>*/}
       </div>
     </motion.div>
    
